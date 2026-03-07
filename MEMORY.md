@@ -31,3 +31,10 @@ Detaliau: PROJECTS.md
 - MEMORY_RULES.md — atminties taisyklės
 - MEMORY.md — šis failas (ilgalaikė atmintis)
 - memory/YYYY-MM-DD.md — kasdieniai įrašai
+
+## Aurimo žymė: SVARBU
+
+Kai Aurimas rašo **SVARBU** (didžiosiomis) bet kurioje žinutės vietoje:
+- Tai taisyklė, kurią privalau įsiminti ir laikytis visada
+- Įrašyti į `AGENTS.md` + `MEMORY.md`
+- Klaida negali kartotis

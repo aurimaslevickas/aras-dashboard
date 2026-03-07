@@ -150,3 +150,12 @@ Kiekvieną UI/frontend pakeitimą PRIVALOMA patikrinti naršyklėje prieš prane
 3. Ypač pavojinga: `t()` ar kiti React hook'ai naudojami už komponento ribų — TypeScript nepastebi, naršyklė crash'ina
 
 Taisyklė: **"padaryta" sakoma tik po naršyklės patikrinimo.**
+
+## 🔴 SVARBU — Aurimo žymė
+
+Kai Aurimas rašo **SVARBU** (didžiosiomis) — prieš tekstą ar po jo — tai reiškia:
+1. Įrašyti kaip taisyklę į `AGENTS.md` ir `MEMORY.md`
+2. Ši klaida/taisyklė negali kartotis
+3. Jei kartojasi — tai rimtas nepriimtinas gedimas
+
+Nėra išimčių.

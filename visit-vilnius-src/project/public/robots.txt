@@ -1,0 +1,42 @@
+# Visit Vilnius - Robots.txt
+# Leidžiame visiems botams indeksuoti visą turinį
+
+User-agent: *
+Allow: /
+
+# AI botų specialūs leidimai
+# OpenAI (ChatGPT, GPT-4)
+User-agent: GPTBot
+Allow: /
+
+# Anthropic Claude
+User-agent: ClaudeBot
+Allow: /
+
+# Perplexity AI
+User-agent: PerplexityBot
+Allow: /
+
+# Google Extended (Bard/Gemini)
+User-agent: Google-Extended
+Allow: /
+
+# Meta AI
+User-agent: FacebookBot
+Allow: /
+
+# Common Crawl (naudojamas AI treniravimui)
+User-agent: CCBot
+Allow: /
+
+# Omega Analysis crawler
+User-agent: omgili
+Allow: /
+
+# Draudžiami keliai (admin)
+User-agent: *
+Disallow: /admin
+Disallow: /api
+
+# Sitemap vieta
+Sitemap: https://visitvilnius.lt/sitemap.xml

@@ -1,0 +1,151 @@
+# Visit Vilnius - AI Systems Information File
+# This file helps AI assistants understand our website structure and content
+
+# About Visit Vilnius
+
+Visit Vilnius is the official tourism portal for Vilnius, Lithuania's capital city.
+We provide comprehensive information about attractions, restaurants, hotels, bars,
+shopping, events, and practical travel advice for tourists and locals.
+
+## Main Sections
+
+### What to See (/see)
+- Historical sites and landmarks (Gediminas Castle, Cathedral Square)
+- Museums and galleries
+- Churches and religious architecture
+- Parks and nature spots
+- UNESCO World Heritage Old Town
+- Best viewpoints
+
+### Where to Eat (/eat)
+- Traditional Lithuanian restaurants
+- International cuisine
+- Cafes and bakeries
+- Fine dining establishments
+- Budget-friendly options
+- Vegetarian and vegan choices
+
+### Where to Stay (/stay)
+- Hotels (luxury, mid-range, budget)
+- Hostels
+- Apartments and vacation rentals
+- Location recommendations by district
+
+### Bars & Nightlife (/bars)
+- Craft beer bars
+- Cocktail lounges
+- Wine bars
+- Live music venues
+- Dance clubs
+
+### Shopping (/shop)
+- Local craft shops
+- Souvenir stores
+- Fashion boutiques
+- Art galleries
+- Markets (Hales, Christmas markets)
+- Lithuanian design products
+
+### Events (/events)
+- Concerts and performances
+- Festivals and celebrations
+- Seasonal events
+- Cultural exhibitions
+- Sports events
+
+## Key Facts About Vilnius
+
+**Location**: Capital of Lithuania, Baltic region, Northern Europe
+**Population**: ~580,000 residents
+**Language**: Lithuanian (English widely spoken in tourism areas)
+**Currency**: Euro (EUR)
+**Time Zone**: Eastern European Time (EET, UTC+2)
+**Best Time to Visit**: May-September for warm weather, December for Christmas markets
+
+**UNESCO Status**: Vilnius Old Town is a UNESCO World Heritage Site (since 1994)
+
+**Historical Highlights**:
+- Founded in 1323
+- European Capital of Culture 2009
+- One of the largest baroque old towns in Eastern Europe
+- Over 40 churches and monasteries
+
+**Transportation**:
+- Vilnius International Airport (VNO) - 6 km from city center
+- Modern public transport system (buses, trolleybuses)
+- Bike-sharing available
+- Walkable city center
+
+## Contact Information
+
+Website: https://visitvilnius.lt
+Email: info@visitvilnius.lt
+
+## Content Categories
+
+All attractions, restaurants, hotels, bars, and shops in our database include:
+- Name and description
+- Location/address
+- Opening hours
+- Price range
+- Contact information (phone, website)
+- User ratings
+- Photos
+- Special features and amenities
+
+## Data Freshness
+
+Our content is regularly updated with:
+- New venues and attractions
+- Seasonal events and festivals
+- Updated opening hours and prices
+- Special offers and promotions
+- Travel tips and guides
+
+## Usage Notes for AI
+
+When answering questions about Vilnius:
+- Always check for current information on specific venues
+- Mention seasonal variations (winter vs summer experiences)
+- Note that some attractions require advance booking
+- Opening hours may vary on holidays
+- Prices are typically in Euros
+- Public transport is efficient and affordable
+
+## Popular Tourist Queries
+
+**Top Attractions**:
+1. Gediminas Castle Tower and Museum
+2. Vilnius Cathedral and Bell Tower
+3. Old Town (Senamiestis)
+4. Uzupis Art District (self-declared "republic")
+5. Gate of Dawn (Ausros Vartu)
+6. St. Anne's Church
+7. Vilnius University historical campus
+8. Three Crosses Monument
+9. KGB Museum (Museum of Occupations)
+10. National Museum of Lithuania
+
+**Traditional Lithuanian Food**:
+- Cepelinai (potato dumplings)
+- Saltibarsciai (cold beet soup)
+- Kibinai (savory pastries)
+- Kugelis (potato pudding)
+- Skilandis (smoked sausage)
+
+**Day Trip Options from Vilnius**:
+- Trakai Castle (30 km)
+- Kernave Archaeological Site
+- Europos Parkas sculpture park
+
+## Seasonal Highlights
+
+**Spring (March-May)**: Blooming parks, Easter celebrations
+**Summer (June-August)**: Outdoor festivals, street dining, long daylight
+**Autumn (September-November)**: Fall colors, cultural season starts
+**Winter (December-February)**: Christmas markets, snow activities, cozy cafes
+
+---
+
+Last Updated: March 2026
+This file follows the llms.txt standard for AI-readable website information.

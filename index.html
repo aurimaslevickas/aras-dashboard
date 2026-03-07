@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GyvenimoKlubas — Aras Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  
+  body { font-family: 'Inter', sans-serif; background: #0a0f1e; color: #e2e8f0; }
+  .card { background: #111827; border: 1px solid #1e2d4a; border-radius: 12px; }
+  .card-glow { box-shadow: 0 0 20px rgba(99,102,241,0.08); }
+  .status-active { background: #052e16; color: #4ade80; border: 1px solid #166534; }
+  .status-inactive { background: #1c1917; color: #a8a29e; border: 1px solid #44403c; }
+  .status-paused { background: #1c1917; color: #fbbf24; border: 1px solid #78350f; }
+  .badge-green { background: #052e16; color: #4ade80; }
+  .badge-red { background: #2d0a0a; color: #f87171; }
+  .badge-yellow { background: #1c1008; color: #fbbf24; }
+  .badge-blue { background: #0c1a2e; color: #60a5fa; }
+  .agent-card { transition: all 0.2s; cursor: pointer; }
+  .agent-card:hover { border-color: #4f46e5; transform: translateY(-1px); }
+  .rec-item { border-left: 3px solid; padding-left: 12px; }
+  .rec-item.urgent { border-color: #ef4444; }
+  .rec-item.good { border-color: #22c55e; }
+  .rec-item.warn { border-color: #f59e0b; }
+  .rec-item.info { border-color: #6366f1; }
+  .pulse { animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+  .tab { cursor: pointer; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; color: #6b7280; }
+  .tab.active { background: #1e2d4a; color: #e2e8f0; }
+  .tab:hover:not(.active) { color: #9ca3af; }
+  .metric-up { color: #4ade80; }
+  .metric-down { color: #f87171; }
+  ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #0a0f1e; } ::-webkit-scrollbar-thumb { background: #1e2d4a; border-radius: 3px; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- TOP BAR -->
+<div class="border-b border-gray-800 px-6 py-3 flex items-center justify-between sticky top-0 z-50" style="background:#0a0f1e;">
+  <div class="flex items-center gap-3">
+    <span class="text-2xl">🦅</span>
+    <div>
+      <div class="font-bold text-white text-sm">Aras Dashboard</div>
+      <div class="text-xs text-gray-500">GyvenimoKlubas.lt · Agentu Sistema</div>
+    </div>
+  </div>
+  <div class="flex items-center gap-4">
+    <div class="text-xs text-gray-500">Duomenys: 2026-01-01 — 2026-03-07 (65d)</div>
+    <div class="flex items-center gap-1.5 text-xs">
+      <div class="w-2 h-2 rounded-full bg-green-500 pulse"></div>
+      <span class="text-green-400">Live</span>
+    </div>
+    <div class="text-xs px-3 py-1.5 rounded-lg" style="background:#1e2d4a;color:#a5b4fc;">+ Prijungti API</div>
+  </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-6 py-6">
+
+<!-- TABS -->
+<div class="flex gap-1 mb-6" style="background:#111827;border:1px solid #1e2d4a;border-radius:10px;padding:4px;display:inline-flex;">
+  <div class="tab active" onclick="showTab('overview')">📊 Apžvalga</div>
+  <div class="tab" onclick="showTab('campaigns')">📣 Kampanijos</div>
+  <div class="tab" onclick="showTab('agents')">🤖 Agentai</div>
+  <div class="tab" onclick="showTab('learning')">🧠 Mokymasis</div>
+  <div class="tab" onclick="showTab('setup')">⚙️ Nustatymai</div>
+</div>
+
+<!-- ===== OVERVIEW TAB ===== -->
+<div id="tab-overview">
+
+<!-- KPI ROW -->
+<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+  <div class="card p-4">
+    <div class="text-xs text-gray-500 mb-1">Išleista (65d)</div>
+    <div class="text-2xl font-bold text-white">€2,765</div>
+    <div class="text-xs text-gray-400 mt-1">€42.55/dieną</div>
+  </div>
+  <div class="card p-4">
+    <div class="text-xs text-gray-500 mb-1">Pirkimų</div>
+    <div class="text-2xl font-bold text-white">286</div>
+    <div class="text-xs text-green-400 mt-1">↑ 3 aktyvios</div>
+  </div>
+  <div class="card p-4">
+    <div class="text-xs text-gray-500 mb-1">Vidutinis CPA</div>
+    <div class="text-2xl font-bold text-white">€4.36</div>
+    <div class="text-xs text-gray-400 mt-1">pirkimams</div>
+  </div>
+  <div class="card p-4">
+    <div class="text-xs text-gray-500 mb-1">Geriausia kampanija</div>
+    <div class="text-sm font-bold text-green-400">Cholesterolis</div>
+    <div class="text-xs text-gray-400 mt-1">€2.56/pirkimas</div>
+  </div>
+  <div class="card p-4">
+    <div class="text-xs text-gray-500 mb-1">Stripe pajamos</div>
+    <div class="text-2xl font-bold text-gray-600">—</div>
+    <div class="text-xs text-indigo-400 mt-1 cursor-pointer" onclick="showTab('setup')">+ Prijungti</div>
+  </div>
+</div>
+
+<!-- QUICK RECOMMENDATIONS -->
+<div class="card p-5 mb-6">
+  <div class="flex items-center gap-2 mb-4">
+    <span class="text-lg">⚡</span>
+    <h2 class="font-semibold text-white">Skubios rekomendacijos</h2>
+    <span class="ml-auto text-xs px-2 py-1 rounded badge-blue">Aras analizė</span>
+  </div>
+  <div class="space-y-3">
+    <div class="rec-item good">
+      <div class="font-medium text-sm text-white">✅ Cholesterolis KNYGA — PALIKTI, padidinti biudžetą</div>
+      <div class="text-xs text-gray-400 mt-0.5">€2.56/pirkimas yra puikus. Dabartinis biudžetas €10/d — bandyti €20-25/d ir stebėti ar CPA nekyla. Jei nepasikeičia — kelt toliau.</div>
+    </div>
+    <div class="rec-item good">
+      <div class="font-medium text-sm text-white">✅ Žarnyno kodas — PALIKTI, optimizuoti toliau</div>
+      <div class="text-xs text-gray-400 mt-0.5">€2.18/lead — vienas geriausių rodiklių. 614 leadų per 65 dienas. Klausimas — ar šie leadai konvertuoja į pardavimus? Reikalingas Stripe sujungimas.</div>
+    </div>
+    <div class="rec-item warn">
+      <div class="font-medium text-sm text-white">⚠️ PASKUTINĖ TINDERIO ŽINUTĖ — PERŽIŪRĖTI</div>
+      <div class="text-xs text-gray-400 mt-0.5">€10.33/pirkimas — beveik 4x brangiau nei Cholesterolis. Testuoti naują creative arba auditorija. Jei per 14d nepagerės — laikinai sustabdyti.</div>
+    </div>
+    <div class="rec-item urgent">
+      <div class="font-medium text-sm text-white">🔴 Mano kūnas — IŠJUNGTA (teisinga)</div>
+      <div class="text-xs text-gray-400 mt-0.5">€36.64/lead — katastrofiškai brangu. Neatnaujinti kol nebus naujas creative ir aiški strategija.</div>
+    </div>
+    <div class="rec-item info">
+      <div class="font-medium text-sm text-white">💡 Menopauzes planas — POTENCIALAS</div>
+      <div class="text-xs text-gray-400 mt-0.5">Inactive, bet €6.37/pirkimas — ne blogai. Susiję su Antras Pavasaris projektu. Kai bus nauja landing page — verta paleisti iš naujo su nauju creative.</div>
+    </div>
+  </div>
+</div>
+
+<!-- CAMPAIGNS + CHART -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+  <div class="card p-5">
+    <h3 class="font-semibold text-white mb-4 text-sm">CPA palyginimas (€/rezultatą)</h3>
+    <canvas id="cpaChart" height="200"></canvas>
+  </div>
+  <div class="card p-5">
+    <h3 class="font-semibold text-white mb-4 text-sm">Išlaidos pagal kampaniją</h3>
+    <canvas id="spendChart" height="200"></canvas>
+  </div>
+</div>
+
+</div><!-- /overview -->
+
+<!-- ===== CAMPAIGNS TAB ===== -->
+<div id="tab-campaigns" style="display:none;">
+  <div class="card overflow-hidden mb-6">
+    <div class="p-4 border-b border-gray-800">
+      <h2 class="font-semibold text-white">Facebook Ads kampanijos</h2>
+      <p class="text-xs text-gray-500 mt-1">2026-01-01 – 2026-03-07 · Datos iš CSV failo</p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-800 text-left">
+            <th class="px-4 py-3 text-gray-400 font-medium">Kampanija</th>
+            <th class="px-4 py-3 text-gray-400 font-medium">Statusas</th>
+            <th class="px-4 py-3 text-gray-400 font-medium">Tipas</th>
+            <th class="px-4 py-3 text-gray-400 font-medium text-right">Rezultatai</th>
+            <th class="px-4 py-3 text-gray-400 font-medium text-right">CPA</th>
+            <th class="px-4 py-3 text-gray-400 font-medium text-right">Išleista</th>
+            <th class="px-4 py-3 text-gray-400 font-medium text-right">Reach</th>
+            <th class="px-4 py-3 text-gray-400 font-medium">Rekomendacija</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-gray-800 hover:bg-gray-900 transition-colors">
+            <td class="px-4 py-3 text-white font-medium">Žarnyno kodas</td>
+            <td class="px-4 py-3"><span class="status-active text-xs px-2 py-1 rounded-full">Active</span></td>
+            <td class="px-4 py-3 text-gray-400">Lead</td>
+            <td class="px-4 py-3 text-right text-white font-bold">614</td>
+            <td class="px-4 py-3 text-right"><span class="badge-green px-2 py-1 rounded text-xs font-bold">€2.18</span></td>
+            <td class="px-4 py-3 text-right text-white">€1,336.58</td>
+            <td class="px-4 py-3 text-right text-gray-400">68,432</td>
+            <td class="px-4 py-3 text-xs"><span class="badge-green px-2 py-1 rounded">Palikti</span></td>
+          </tr>
+          <tr class="border-b border-gray-800 hover:bg-gray-900 transition-colors">
+            <td class="px-4 py-3 text-white font-medium">Cholesterolis KNYGA</td>
+            <td class="px-4 py-3"><span class="status-active text-xs px-2 py-1 rounded-full">Active</span></td>
+            <td class="px-4 py-3 text-gray-400">Purchase</td>
+            <td class="px-4 py-3 text-right text-white font-bold">198</td>
+            <td class="px-4 py-3 text-right"><span class="badge-green px-2 py-1 rounded text-xs font-bold">€2.56</span></td>
+            <td class="px-4 py-3 text-right text-white">€506.47</td>
+            <td class="px-4 py-3 text-right text-gray-400">31,263</td>
+            <td class="px-4 py-3 text-xs"><span class="bg-blue-900 text-blue-300 px-2 py-1 rounded">↑ Biudžetą</span></td>
+          </tr>
+          <tr class="border-b border-gray-800 hover:bg-gray-900 transition-colors">
+            <td class="px-4 py-3 text-white font-medium">Menopauzes planas</td>
+            <td class="px-4 py-3"><span class="status-inactive text-xs px-2 py-1 rounded-full">Inactive</span></td>
+            <td class="px-4 py-3 text-gray-400">Purchase</td>
+            <td class="px-4 py-3 text-right text-white font-bold">52</td>
+            <td class="px-4 py-3 text-right"><span class="badge-yellow px-2 py-1 rounded text-xs font-bold">€6.37</span></td>
+            <td class="px-4 py-3 text-right text-white">€331.14</td>
+            <td class="px-4 py-3 text-right text-gray-400">17,830</td>
+            <td class="px-4 py-3 text-xs"><span class="badge-yellow px-2 py-1 rounded">Naujas LP</span></td>
+          </tr>
+          <tr class="border-b border-gray-800 hover:bg-gray-900 transition-colors">
+            <td class="px-4 py-3 text-white font-medium">TINDERIO ŽINUTĖ</td>
+            <td class="px-4 py-3"><span class="status-active text-xs px-2 py-1 rounded-full">Active</span></td>
+            <td class="px-4 py-3 text-gray-400">Purchase</td>
+            <td class="px-4 py-3 text-right text-white font-bold">36</td>
+            <td class="px-4 py-3 text-right"><span class="badge-red px-2 py-1 rounded text-xs font-bold">€10.33</span></td>
+            <td class="px-4 py-3 text-right text-white">€371.79</td>
+            <td class="px-4 py-3 text-right text-gray-400">20,067</td>
+            <td class="px-4 py-3 text-xs"><span class="badge-red px-2 py-1 rounded">Testuoti creative</span></td>
+          </tr>
+          <tr class="hover:bg-gray-900 transition-colors">
+            <td class="px-4 py-3 text-white font-medium">Mano kūnas</td>
+            <td class="px-4 py-3"><span class="status-inactive text-xs px-2 py-1 rounded-full">Inactive</span></td>
+            <td class="px-4 py-3 text-gray-400">Lead</td>
+            <td class="px-4 py-3 text-right text-white font-bold">6</td>
+            <td class="px-4 py-3 text-right"><span class="badge-red px-2 py-1 rounded text-xs font-bold">€36.64</span></td>
+            <td class="px-4 py-3 text-right text-white">€219.85</td>
+            <td class="px-4 py-3 text-right text-gray-400">8,830</td>
+            <td class="px-4 py-3 text-xs"><span class="badge-red px-2 py-1 rounded">Nepaleisti</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ROI Analysis -->
+  <div class="card p-5">
+    <h3 class="font-semibold text-white mb-4">ROI analizė (kai prijungsite Stripe)</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="p-4 rounded-lg" style="background:#0f172a;border:1px solid #1e3a5f;">
+        <div class="text-xs text-gray-500 mb-2">Jei Cholesterolis knyga = €9.99</div>
+        <div class="text-lg font-bold text-white">ROAS: ~3.9x</div>
+        <div class="text-xs text-green-400 mt-1">€2.56 išleista → €9.99 gautas</div>
+        <div class="text-xs text-gray-500 mt-2">Pelningumas priklauso nuo faktinės produkto kainos</div>
+      </div>
+      <div class="p-4 rounded-lg" style="background:#0f172a;border:1px solid #1e3a5f;">
+        <div class="text-xs text-gray-500 mb-2">Jei TINDERIO žinutė = €19.99</div>
+        <div class="text-lg font-bold text-yellow-400">ROAS: ~1.9x</div>
+        <div class="text-xs text-yellow-400 mt-1">€10.33 išleista → €19.99 gautas</div>
+        <div class="text-xs text-gray-500 mt-2">Ribinis pelningumas. Reikia optimizuoti.</div>
+      </div>
+      <div class="p-4 rounded-lg" style="background:#0f172a;border:1px solid #1e3a5f;">
+        <div class="text-xs text-gray-500 mb-2">Stripe prijungus</div>
+        <div class="text-lg font-bold text-indigo-400">Tikslus ROI</div>
+        <div class="text-xs text-gray-400 mt-1">Kiekviena kampanija → tikri pinigai</div>
+        <div class="text-xs text-indigo-400 mt-2 cursor-pointer" onclick="showTab('setup')">→ Prijungti Stripe</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== AGENTS TAB ===== -->
+<div id="tab-agents" style="display:none;">
+  <div class="mb-4 p-4 rounded-lg" style="background:#0f172a;border:1px solid #1e3a5f;">
+    <div class="text-xs text-indigo-300">🤖 Agentai šiuo metu veikia CSV duomenimis. Kai prijungsite Facebook API + Stripe — veiks realiu laiku.</div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+
+    <div class="card p-5 agent-card">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:#1e3a1a;">📊</div>
+        <div>
+          <div class="font-semibold text-white text-sm">Analitikas</div>
+          <div class="text-xs text-gray-500">Analytics Agent</div>
+        </div>
+        <span class="ml-auto text-xs px-2 py-1 rounded badge-yellow">Laukia API</span>
+      </div>
+      <p class="text-xs text-gray-400 mb-3">Kas 6h tikrina kampanijų rodiklius. Skaičiuoja ROAS, CPA, CTR. Palygina su praeita savaite. Pažymi anomalijas.</p>
+      <div class="text-xs text-gray-600">Modelis: Claude Sonnet</div>
+    </div>
+
+    <div class="card p-5 agent-card">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:#1e1a3a;">🎯</div>
+        <div>
+          <div class="font-semibold text-white text-sm">Strategas</div>
+          <div class="text-xs text-gray-500">Strategy Agent</div>
+        </div>
+        <span class="ml-auto text-xs px-2 py-1 rounded badge-yellow">Laukia API</span>
+      </div>
+      <p class="text-xs text-gray-400 mb-3">Kas dieną priima sprendimus: padidinti/mažinti biudžetą, išjungti, paleisti naują. Rengia ataskaitą Aurimui.</p>
+      <div class="text-xs text-gray-600">Modelis: Claude Sonnet</div>
+    </div>
+
+    <div class="card p-5 agent-card">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:#3a1a1a;">✍️</div>
+        <div>
+          <div class="font-semibold text-white text-sm">Creative</div>
+          <div class="text-xs text-gray-500">Creative Agent</div>
+        </div>
+        <span class="ml-auto text-xs px-2 py-1 rounded" style="background:#1c1008;color:#fbbf24;">Paruoštas</span>
+      </div>
+      <p class="text-xs text-gray-400 mb-3">Kuria reklamos tekstus, antraštes, CTA. A/B variantai. Mokosi iš to kas veikė — saugo laimėjusius šablonus.</p>
+      <div class="text-xs text-gray-600">Modelis: GPT-4o mini</div>
+    </div>
+
+    <div class="card p-5 agent-card">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:#1a2a3a;">🖥️</div>
+        <div>
+          <div class="font-semibold text-white text-sm">Landing Pages</div>
+          <div class="text-xs text-gray-500">Page Agent</div>
+        </div>
+        <span class="ml-auto text-xs px-2 py-1 rounded" style="background:#1c1008;color:#fbbf24;">Paruoštas</span>
+      </div>
+      <p class="text-xs text-gray-400 mb-3">Kuria ir tobulina landing pages pagal konversijų duomenis. Saugo kas veikė (elementai, tekstai, struktūra).</p>
+      <div class="text-xs text-gray-600">Modelis: Claude Sonnet</div>
+    </div>
+
+    <div class="card p-5 agent-card">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:#1a3a2a;">🔬</div>
+        <div>
+          <div class="font-semibold text-white text-sm">Tyrėjas</div>
+          <div class="text-xs text-gray-500">Research Agent</div>
+        </div>
+        <span class="ml-auto text-xs px-2 py-1 rounded" style="background:#1c1008;color:#fbbf24;">Paruoštas</span>
+      </div>
+      <p class="text-xs text-gray-400 mb-3">Nauja rinka → auditorija, konkurentai, kainodara. Pateikia ataskaitą prieš paleidžiant naują kampaniją.</p>
+      <div class="text-xs text-gray-600">Modelis: GPT-4o mini</div>
+    </div>
+
+    <div class="card p-5 agent-card">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:#2a1a3a;">💳</div>
+        <div>
+          <div class="font-semibold text-white text-sm">Stripe Tiltas</div>
+          <div class="text-xs text-gray-500">Revenue Agent</div>
+        </div>
+        <span class="ml-auto text-xs px-2 py-1 rounded badge-yellow">Laukia API</span>
+      </div>
+      <p class="text-xs text-gray-400 mb-3">Susieja FB Ads kampaniją su Stripe pirkimu. Tikslus ROI kiekvienai reklamai. Rodo tikrus pinigus, ne tik "purchase events".</p>
+      <div class="text-xs text-gray-600">Modelis: Claude Sonnet</div>
+    </div>
+
+  </div>
+
+  <!-- Agent Communication -->
+  <div class="card p-5">
+    <h3 class="font-semibold text-white mb-4">🔄 Agentų komunikacija</h3>
+    <div class="space-y-2 text-sm">
+      <div class="flex items-center gap-3 p-3 rounded-lg" style="background:#0f172a;">
+        <span class="text-gray-500 text-xs w-20 flex-shrink-0">Analitikas →</span>
+        <span class="text-indigo-400">→</span>
+        <span class="text-white">Strategas</span>
+        <span class="text-xs text-gray-500 ml-auto">Duomenys + anomalijos</span>
+      </div>
+      <div class="flex items-center gap-3 p-3 rounded-lg" style="background:#0f172a;">
+        <span class="text-gray-500 text-xs w-20 flex-shrink-0">Strategas →</span>
+        <span class="text-indigo-400">→</span>
+        <span class="text-white">Creative + LP Agentai</span>
+        <span class="text-xs text-gray-500 ml-auto">Užsakymas: naujas testas</span>
+      </div>
+      <div class="flex items-center gap-3 p-3 rounded-lg" style="background:#0f172a;">
+        <span class="text-gray-500 text-xs w-20 flex-shrink-0">Stripe →</span>
+        <span class="text-indigo-400">→</span>
+        <span class="text-white">Analitikas + Strategas</span>
+        <span class="text-xs text-gray-500 ml-auto">Tikri pardavimai</span>
+      </div>
+      <div class="flex items-center gap-3 p-3 rounded-lg" style="background:#0f172a;">
+        <span class="text-gray-500 text-xs w-20 flex-shrink-0">Visi →</span>
+        <span class="text-indigo-400">→</span>
+        <span class="text-white">Aras (Aš)</span>
+        <span class="text-xs text-gray-500 ml-auto">Galutinis sprendimas + Aurimo ataskaita</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LEARNING TAB ===== -->
+<div id="tab-learning" style="display:none;">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+
+    <div class="card p-5">
+      <div class="flex items-center gap-2 mb-4">
+        <span>🏆</span>
+        <h3 class="font-semibold text-white text-sm">Kas veikia (iš CSV)</h3>
+      </div>
+      <div class="space-y-3">
+        <div class="p-3 rounded-lg" style="background:#052e16;border:1px solid #166534;">
+          <div class="text-xs font-bold text-green-400 mb-1">✅ Sveikatos informacinis produktas + tiksli auditorija</div>
+          <div class="text-xs text-gray-400">Cholesterolis (€2.56) ir Žarnynas (€2.18) — abu sveikatos nišoje su aiškia problema.</div>
+        </div>
+        <div class="p-3 rounded-lg" style="background:#052e16;border:1px solid #166534;">
+          <div class="text-xs font-bold text-green-400 mb-1">✅ Mažos kainos + aukštas lead volume</div>
+          <div class="text-xs text-gray-400">Žarnyno kodas: 614 leadų. Lead kampanijos veikia geriau nei cold traffic purchase.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-5">
+      <div class="flex items-center gap-2 mb-4">
+        <span>❌</span>
+        <h3 class="font-semibold text-white text-sm">Kas neveikia</h3>
+      </div>
+      <div class="space-y-3">
+        <div class="p-3 rounded-lg" style="background:#2d0a0a;border:1px solid #7f1d1d;">
+          <div class="text-xs font-bold text-red-400 mb-1">❌ Mano kūnas — €36.64/lead</div>
+          <div class="text-xs text-gray-400">Nepakankamas auditorijos/pranešimo suderinamumas. Greičiausiai per plati auditorija arba silpnas hook.</div>
+        </div>
+        <div class="p-3 rounded-lg" style="background:#1c1008;border:1px solid #78350f;">
+          <div class="text-xs font-bold text-yellow-400 mb-1">⚠️ TINDERIO ŽINUTĖ — €10.33/pirkimas</div>
+          <div class="text-xs text-gray-400">Potencialiai per brangu. Klausimas — kokia produkto kaina? Jei €29+ tai gali būti ok.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Knowledge Base -->
+  <div class="card p-5">
+    <div class="flex items-center gap-2 mb-4">
+      <span>🧠</span>
+      <h3 class="font-semibold text-white">Mokymosi bazė</h3>
+      <span class="ml-auto text-xs px-2 py-1 rounded badge-blue">2 įrašai</span>
+    </div>
+    <div class="space-y-2 mb-4" id="knowledge-list">
+      <div class="p-3 rounded-lg text-xs" style="background:#0f172a;border:1px solid #1e2d4a;">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-indigo-400 font-bold">Taisyklė #1</span>
+          <span class="text-gray-600">2026-03-07</span>
+          <span class="ml-auto badge-green px-1.5 py-0.5 rounded text-xs">Creative</span>
+        </div>
+        <div class="text-white">Sveikatos nišoje: konkreti problema > bendra gerovė</div>
+        <div class="text-gray-500 mt-1">Cholesterolis (€2.56) vs Mano kūnas (€36.64) — konkretus skausmas konvertuoja 14x geriau</div>
+      </div>
+      <div class="p-3 rounded-lg text-xs" style="background:#0f172a;border:1px solid #1e2d4a;">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-indigo-400 font-bold">Taisyklė #2</span>
+          <span class="text-gray-600">2026-03-07</span>
+          <span class="ml-auto badge-blue px-1.5 py-0.5 rounded text-xs">Auditorija</span>
+        </div>
+        <div class="text-white">Lead magnet + auto webinaras veikia LT rinkai</div>
+        <div class="text-gray-500 mt-1">Žarnyno kodas: 614 leadų @ €2.18 — funnel su webinaru konvertuoja gerai</div>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <input id="new-lesson" type="text" placeholder="Pridėti naują pamoką / pastebėjimą..." class="flex-1 px-3 py-2 rounded-lg text-sm text-white placeholder-gray-600 outline-none" style="background:#0f172a;border:1px solid #1e2d4a;">
+      <button onclick="addLesson()" class="px-4 py-2 rounded-lg text-sm font-medium text-white" style="background:#4f46e5;">+ Pridėti</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SETUP TAB ===== -->
+<div id="tab-setup" style="display:none;">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <div class="card p-5">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-lg" style="background:#0c2d6b;">f</div>
+        <div>
+          <h3 class="font-semibold text-white text-sm">Facebook Ads API</h3>
+          <div class="text-xs text-gray-500">Meta Marketing API v19</div>
+        </div>
+        <span class="ml-auto text-xs px-2 py-1 rounded badge-red">Neprijungta</span>
+      </div>
+      <div class="space-y-2">
+        <div>
+          <label class="text-xs text-gray-400 block mb-1">App ID</label>
+          <input type="text" placeholder="123456789" class="w-full px-3 py-2 rounded-lg text-sm text-white placeholder-gray-600 outline-none" style="background:#0f172a;border:1px solid #1e2d4a;">
+        </div>
+        <div>
+          <label class="text-xs text-gray-400 block mb-1">App Secret</label>
+          <input type="password" placeholder="••••••••••••••••" class="w-full px-3 py-2 rounded-lg text-sm text-white placeholder-gray-600 outline-none" style="background:#0f172a;border:1px solid #1e2d4a;">
+        </div>
+        <div>
+          <label class="text-xs text-gray-400 block mb-1">Access Token</label>
+          <input type="password" placeholder="EAAxxxxx..." class="w-full px-3 py-2 rounded-lg text-sm text-white placeholder-gray-600 outline-none" style="background:#0f172a;border:1px solid #1e2d4a;">
+        </div>
+        <div>
+          <label class="text-xs text-gray-400 block mb-1">Ad Account ID</label>
+          <input type="text" placeholder="act_123456789" class="w-full px-3 py-2 rounded-lg text-sm text-white placeholder-gray-600 outline-none" style="background:#0f172a;border:1px solid #1e2d4a;">
+        </div>
+        <button class="w-full py-2 rounded-lg text-sm font-medium mt-2" style="background:#4f46e5;color:white;">Prisijungti</button>
+      </div>
+    </div>
+
+    <div class="card p-5">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-lg" style="background:#1a1042;">💳</div>
+        <div>
+          <h3 class="font-semibold text-white text-sm">Stripe</h3>
+          <div class="text-xs text-gray-500">Pardavimai ir pajamos</div>
+        </div>
+        <span class="ml-auto text-xs px-2 py-1 rounded badge-red">Neprijungta</span>
+      </div>
+      <div class="space-y-2">
+        <div>
+          <label class="text-xs text-gray-400 block mb-1">Secret Key</label>
+          <input type="password" placeholder="sk_live_..." class="w-full px-3 py-2 rounded-lg text-sm text-white placeholder-gray-600 outline-none" style="background:#0f172a;border:1px solid #1e2d4a;">
+        </div>
+        <button class="w-full py-2 rounded-lg text-sm font-medium mt-2" style="background:#635bff;color:white;">Prisijungti</button>
+      </div>
+      <div class="mt-4 p-3 rounded-lg text-xs" style="background:#0f172a;">
+        <div class="text-gray-400 mb-1">Kai prijungsite, matysite:</div>
+        <div class="text-gray-500">• Kiekvienos kampanijos tikras ROI</div>
+        <div class="text-gray-500">• Vidutinis pirkimo dydis (AOV)</div>
+        <div class="text-gray-500">• LTV (kiek klientas moka iš viso)</div>
+        <div class="text-gray-500">• Grąžinimų / churn rodikliai</div>
+      </div>
+    </div>
+
+    <div class="card p-5">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-xl">📱</span>
+        <div>
+          <h3 class="font-semibold text-white text-sm">Telegram ataskaitos</h3>
+          <div class="text-xs text-gray-500">Kasdienė santrauka į telefoną</div>
+        </div>
+        <span class="ml-auto text-xs px-2 py-1 rounded badge-green">Aktyvus</span>
+      </div>
+      <div class="space-y-1 text-xs text-gray-400">
+        <div>✅ Rytas (9:00) — dienos santrauka</div>
+        <div>✅ Vakare (18:00) — dienos rezultatai</div>
+        <div>✅ Realiu laiku — jei kažkas labai gerai/blogai</div>
+      </div>
+    </div>
+
+    <div class="card p-5">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-xl">🤖</span>
+        <div>
+          <h3 class="font-semibold text-white text-sm">Modeliai</h3>
+          <div class="text-xs text-gray-500">AI konfigūracija</div>
+        </div>
+      </div>
+      <div class="space-y-2 text-xs">
+        <div class="flex justify-between p-2 rounded" style="background:#0f172a;">
+          <span class="text-gray-400">Strategija / analizė</span>
+          <span class="text-indigo-400">Claude Sonnet 4</span>
+        </div>
+        <div class="flex justify-between p-2 rounded" style="background:#0f172a;">
+          <span class="text-gray-400">Creative tekstai</span>
+          <span class="text-green-400">GPT-4o mini</span>
+        </div>
+        <div class="flex justify-between p-2 rounded" style="background:#0f172a;">
+          <span class="text-gray-400">Vaizdai / creative</span>
+          <span class="text-yellow-400">Gemini Pro</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// Tab switching
+function showTab(name) {
+  document.querySelectorAll('[id^="tab-"]').forEach(el => el.style.display = 'none');
+  document.getElementById('tab-' + name).style.display = 'block';
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  const tabs = { overview: 0, campaigns: 1, agents: 2, learning: 3, setup: 4 };
+  document.querySelectorAll('.tab')[tabs[name]].classList.add('active');
+}
+
+// Charts
+const cpaCtx = document.getElementById('cpaChart').getContext('2d');
+new Chart(cpaCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Žarnynas', 'Cholesterolis', 'Menopauze', 'Tinderis', 'Mano kūnas'],
+    datasets: [{
+      data: [2.18, 2.56, 6.37, 10.33, 36.64],
+      backgroundColor: ['#22c55e','#22c55e','#f59e0b','#ef4444','#ef4444'],
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#6b7280', font: { size: 10 } }, grid: { color: '#1e2d4a' } },
+      y: { ticks: { color: '#6b7280', callback: v => '€'+v }, grid: { color: '#1e2d4a' } }
+    }
+  }
+});
+
+const spendCtx = document.getElementById('spendChart').getContext('2d');
+new Chart(spendCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Žarnynas', 'Cholesterolis', 'Menopauze', 'Tinderis', 'Mano kūnas'],
+    datasets: [{
+      data: [1336.58, 506.47, 331.14, 371.79, 219.85],
+      backgroundColor: ['#6366f1','#22c55e','#f59e0b','#ef4444','#9ca3af'],
+      borderWidth: 0,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { color: '#9ca3af', font: { size: 10 }, padding: 8 } }
+    }
+  }
+});
+
+// Learning
+let lessonCount = 3;
+function addLesson() {
+  const input = document.getElementById('new-lesson');
+  if (!input.value.trim()) return;
+  const list = document.getElementById('knowledge-list');
+  const div = document.createElement('div');
+  div.className = 'p-3 rounded-lg text-xs';
+  div.style = 'background:#0f172a;border:1px solid #1e2d4a;';
+  div.innerHTML = `
+    <div class="flex items-center gap-2 mb-1">
+      <span class="text-indigo-400 font-bold">Taisyklė #${lessonCount++}</span>
+      <span class="text-gray-600">${new Date().toISOString().slice(0,10)}</span>
+      <span class="ml-auto" style="background:#1c1008;color:#fbbf24;padding:2px 6px;border-radius:4px;font-size:10px;">Nauja</span>
+    </div>
+    <div class="text-white">${input.value}</div>`;
+  list.appendChild(div);
+  input.value = '';
+}
+</script>
+</body>
+</html>

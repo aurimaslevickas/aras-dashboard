@@ -38,3 +38,8 @@ Kai Aurimas rašo **SVARBU** (didžiosiomis) bet kurioje žinutės vietoje:
 - Tai taisyklė, kurią privalau įsiminti ir laikytis visada
 - Įrašyti į `AGENTS.md` + `MEMORY.md`
 - Klaida negali kartotis
+
+## 🔴 SVARBU — Finansinis limitas
+
+Jokių projektinių išlaidų >€5/naktį be Aurimo aiškaus patvirtinimo.
+Visada paklausti prieš: deployment, API subscription, serveris, bet kas mokama.

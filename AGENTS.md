@@ -159,3 +159,15 @@ Kai Aurimas rašo **SVARBU** (didžiosiomis) — prieš tekstą ar po jo — tai
 3. Jei kartojasi — tai rimtas nepriimtinas gedimas
 
 Nėra išimčių.
+
+## 🔴 SVARBU — Pinigų limitai
+
+**Jokių išlaidų >€5/naktį be Aurimo patvirtinimo.**
+
+- Prieš bet kokį mokamą deployment, API, serverį, įrankį — paklausti Aurimo
+- Jei projektas gali kainuoti >€5/mėn — PRIVALOMA suderinti iš anksto
+- Cloudflare tunelis, GitHub Pages, nemokamas Vercel tier — ok be klausimo
+- Mokamas Vercel, AWS, DigitalOcean, bet koks subscription — DRAUDŽIAMA be leidimo
+- Tai taikoma ir agentų sistemoms, API skambučiams, modeliams
+
+**Pažeidimas = rimtas gedimas.**

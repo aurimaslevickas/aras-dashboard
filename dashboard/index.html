@@ -338,8 +338,6 @@ nav { flex: 1; padding: 12px 10px; }
                 <th>Produktas</th>
                 <th>Pardavimai</th>
                 <th>Pajamos</th>
-                <th>Mokesčiai (Stripe)</th>
-                <th>Grynos pajamos</th>
                 <th>Vid. kaina</th>
                 <th>Kampanija</th>
                 <th>ROAS</th>
@@ -1334,25 +1332,41 @@ function stripeFetch(endpoint, params = {}) {
   });
 }
 
+function getPeriodRange(period) {
+  const now = new Date();
+  const midnight = (d) => Math.floor(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0,0,0).getTime() / 1000);
+  if (period === 'today') {
+    return { gte: midnight(now), lt: midnight(now) + 86400 };
+  }
+  if (period === 'yesterday') {
+    const yest = new Date(now); yest.setDate(yest.getDate() - 1);
+    return { gte: midnight(yest), lt: midnight(now) };
+  }
+  if (period === 'week') {
+    const w = new Date(now); w.setDate(w.getDate() - 7);
+    return { gte: midnight(w) };
+  }
+  // month (default)
+  const m = new Date(now); m.setDate(m.getDate() - 30);
+  return { gte: midnight(m) };
+}
+
 async function loadStripeData(silent) {
   const key = localStorage.getItem('stripe_key');
   if (!key) return;
 
-  // Determine date range based on current period
-  const now = Math.floor(Date.now() / 1000);
-  const periodMap = { today: 86400, yesterday: 172800, week: 604800, month: 2592000 };
-  const seconds = periodMap[state.period] || 2592000;
-  const created = { gte: now - seconds };
+  const range = getPeriodRange(state.period);
 
   try {
-    // Fetch all balance transactions (paginate if needed)
+    // Use charges endpoint (matches Stripe Gross Volume)
     let allTxns = [];
     let hasMore = true;
     let startingAfter = null;
     while (hasMore && allTxns.length < 500) {
-      const params = { limit: 100, type: 'charge', 'created[gte]': created.gte };
+      const params = { limit: 100, 'created[gte]': range.gte, paid: 'true' };
+      if (range.lt) params['created[lt]'] = range.lt;
       if (startingAfter) params.starting_after = startingAfter;
-      const resp = await stripeFetch('/balance_transactions', params);
+      const resp = await stripeFetch('/charges', params);
       allTxns = allTxns.concat(resp.data || []);
       hasMore = resp.has_more;
       if (resp.data && resp.data.length > 0) startingAfter = resp.data[resp.data.length - 1].id;
@@ -1377,12 +1391,13 @@ async function loadStripeData(silent) {
 }
 
 function processStripeData(txns) {
-  // Filter only successful charges (positive amounts)
-  const charges = txns.filter(t => t.amount > 0 && t.status !== 'failed');
+  // charges endpoint: amount = gross in cents, amount_refunded for refunds
+  const charges = txns.filter(t => t.paid && t.amount > 0);
 
-  const totalRevenue = charges.reduce((s, t) => s + t.amount, 0) / 100;
-  const totalNet = charges.reduce((s, t) => s + t.net, 0) / 100;
-  const totalFees = charges.reduce((s, t) => s + t.fee, 0) / 100;
+  const totalRevenue = charges.reduce((s, t) => s + (t.amount - (t.amount_refunded||0)), 0) / 100;
+  // Stripe fee ~1.4% + €0.25 per transaction (estimate; exact fee needs balance_transaction lookup)
+  const totalFees = charges.reduce((s, t) => s + Math.round((t.amount * 0.014) + 25), 0) / 100;
+  const totalNet = totalRevenue - totalFees;
   const totalCount = charges.length;
 
   // Update KPIs
@@ -1411,13 +1426,12 @@ function processStripeData(txns) {
   const products = {};
   charges.forEach(t => {
     const match = matchProduct(t.description);
-    const key = extractProductName(t.description) || match.campaign;
-    if (!products[key]) products[key] = { name: key, campaign: match.campaign, color: match.color, count: 0, revenue: 0, net: 0, fees: 0, amounts: [] };
-    products[key].count++;
-    products[key].revenue += t.amount / 100;
-    products[key].net += t.net / 100;
-    products[key].fees += t.fee / 100;
-    products[key].amounts.push(t.amount / 100);
+    const prodName = extractProductName(t.description) || match.campaign;
+    if (!products[prodName]) products[prodName] = { name: prodName, campaign: match.campaign, color: match.color, count: 0, revenue: 0, amounts: [] };
+    const net = (t.amount - (t.amount_refunded||0)) / 100;
+    products[prodName].count++;
+    products[prodName].revenue += net;
+    products[prodName].amounts.push(net);
   });
 
   // Render product breakdown table
@@ -1441,11 +1455,9 @@ function processStripeData(txns) {
       `<span class="badge badge-red">${roas.toFixed(2)}x</span>`;
 
     return `<tr>
-      <td class="name" style="font-size:12.5px;">${p.name}</td>
+      <td class="name" style="font-size:12.5px;max-width:200px;word-break:break-word;">${p.name}</td>
       <td class="mono">${p.count}</td>
       <td class="mono" style="color:var(--green);">€${p.revenue.toFixed(2)}</td>
-      <td class="mono" style="color:var(--red);font-size:12px;">−€${p.fees.toFixed(2)}</td>
-      <td class="mono">€${p.net.toFixed(2)}</td>
       <td class="mono">€${avg.toFixed(2)}</td>
       <td style="font-size:12px;color:#a5b4fc;">${p.campaign}</td>
       <td>${roasBadge}</td>
@@ -1457,8 +1469,6 @@ function processStripeData(txns) {
     <td class="name" style="font-weight:700;">VISO</td>
     <td class="mono" style="font-weight:700;">${totalCount}</td>
     <td class="mono" style="color:var(--green);font-weight:700;">€${totalRevenue.toFixed(2)}</td>
-    <td class="mono" style="color:var(--red);">−€${totalFees.toFixed(2)}</td>
-    <td class="mono" style="font-weight:700;">€${totalNet.toFixed(2)}</td>
     <td class="mono">€${totalCount > 0 ? (totalRevenue/totalCount).toFixed(2) : '—'}</td>
     <td></td>
     <td></td>

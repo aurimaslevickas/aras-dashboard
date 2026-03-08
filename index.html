@@ -42,6 +42,11 @@ nav { flex: 1; padding: 12px 10px; }
 .fb-conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); display: inline-block; margin-right: 6px; }
 .fb-conn-dot.connected { background: var(--green); animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+@keyframes ccPulse { 0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,0.4)} 50%{box-shadow:0 0 0 8px rgba(99,102,241,0)} }
+@keyframes ccDash { to{stroke-dashoffset:-20} }
+@keyframes ccGlow { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.4)} }
+.cc-agent-active { animation: ccPulse 1.5s infinite !important; border-width: 2px !important; }
+.cc-line-active { animation: ccDash 0.8s linear infinite; opacity: 1 !important; }
 
 /* MAIN */
 #main { margin-left: 220px; flex: 1; min-height: 100vh; }
@@ -534,104 +539,155 @@ nav { flex: 1; padding: 12px 10px; }
 
     <!-- TAB: KOMANDA -->
     <div id="agents-tab-army">
-      <div class="agents-grid">
 
-        <!-- ARAS (strategas) -->
-        <div class="agent-card" style="border-color:#6366f1;border-width:2px;">
-          <div class="agent-header">
-            <div class="agent-avatar" style="background:linear-gradient(135deg,#4338ca,#7c3aed);">🦅</div>
-            <div>
-              <div class="agent-name">Aras <span style="font-size:10px;background:#6366f1;color:white;padding:2px 6px;border-radius:4px;margin-left:4px;">Strategas</span></div>
-              <div class="agent-role">Claude Sonnet 4 · Architektūra, strategija, rizika</div>
-            </div>
-            <div class="agent-status"><span class="badge badge-green">● Aktyvus</span></div>
-          </div>
-          <div class="agent-kpi">
-            <div class="agent-kpi-item"><div class="agent-kpi-label">Modelis</div><div class="agent-kpi-val">Claude Sonnet</div></div>
-            <div class="agent-kpi-item"><div class="agent-kpi-label">Deleguoja</div><div class="agent-kpi-val" id="aras-delegated">0 užd.</div></div>
-          </div>
-          <div class="agent-last" style="font-size:11px;line-height:1.5;">
-            Strateginės, kompleksinės, rizikingos užduotys. Visą likusią taktinę dalį perduoda komandai.
-          </div>
-          <div style="margin-top:10px;padding:8px;background:rgba(99,102,241,0.1);border-radius:6px;font-size:11px;color:#a5b4fc;">
-            <strong>Delegavimo taisyklė:</strong> kiekviena gautą užduotį klasifikuoju → jei taktinė, perduodu pigiausiam tinkamam agentui ir informuoju tave apie rezultatą.
+      <!-- COMMAND CENTER VISUALIZATION -->
+      <div id="command-center" style="background:linear-gradient(180deg,#0a0f1e 0%,#0d1529 100%);border:1px solid var(--border);border-radius:16px;padding:32px 24px;margin-bottom:20px;position:relative;overflow:hidden;min-height:420px;">
+
+        <!-- Background grid -->
+        <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(99,102,241,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,0.05) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;"></div>
+
+        <!-- Title -->
+        <div style="text-align:center;font-size:11px;letter-spacing:3px;color:rgba(99,102,241,0.6);text-transform:uppercase;margin-bottom:24px;">Live Komandų Centras</div>
+
+        <!-- LEVEL 1: AURIMAS -->
+        <div style="display:flex;justify-content:center;margin-bottom:8px;">
+          <div style="text-align:center;">
+            <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#1e293b,#334155);border:2px solid #475569;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 6px;">👤</div>
+            <div style="font-size:12px;font-weight:700;color:white;">Aurimas</div>
+            <div style="font-size:10px;color:var(--muted);">Direktorius</div>
           </div>
         </div>
 
-        <!-- CONTENT AGENT -->
+        <!-- Arrow down -->
+        <div style="display:flex;justify-content:center;margin-bottom:8px;">
+          <div style="width:2px;height:24px;background:linear-gradient(180deg,#475569,#6366f1);position:relative;">
+            <div style="position:absolute;bottom:-4px;left:-4px;width:10px;height:10px;border-right:2px solid #6366f1;border-bottom:2px solid #6366f1;transform:rotate(45deg);"></div>
+          </div>
+        </div>
+
+        <!-- LEVEL 2: ARAS -->
+        <div style="display:flex;justify-content:center;margin-bottom:8px;">
+          <div id="cc-aras" style="text-align:center;padding:10px 20px;background:linear-gradient(135deg,rgba(99,102,241,0.2),rgba(124,58,237,0.2));border:2px solid #6366f1;border-radius:12px;min-width:160px;position:relative;">
+            <div style="font-size:22px;margin-bottom:4px;">🦅</div>
+            <div style="font-size:13px;font-weight:700;color:white;">Aras</div>
+            <div style="font-size:10px;color:#a5b4fc;">Strategas · Claude Sonnet</div>
+            <div id="cc-aras-status" style="font-size:10px;color:#34d399;margin-top:4px;">● Laukia užduočių</div>
+          </div>
+        </div>
+
+        <!-- Delegation lines container -->
+        <div style="display:flex;justify-content:center;margin-bottom:8px;position:relative;height:36px;">
+          <svg id="cc-lines-svg" width="500" height="36" style="position:absolute;overflow:visible;" viewBox="-250 0 500 36">
+            <line id="cc-line-content" x1="0" y1="0" x2="-185" y2="36" stroke="#34d399" stroke-width="1.5" stroke-dasharray="4,4" opacity="0" style="transition:opacity 0.3s;"/>
+            <line id="cc-line-code"    x1="0" y1="0" x2="-60"  y2="36" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="4,4" opacity="0" style="transition:opacity 0.3s;"/>
+            <line id="cc-line-research" x1="0" y1="0" x2="60"  y2="36" stroke="#fb923c" stroke-width="1.5" stroke-dasharray="4,4" opacity="0" style="transition:opacity 0.3s;"/>
+            <line id="cc-line-analytics" x1="0" y1="0" x2="185" y2="36" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4,4" opacity="0" style="transition:opacity 0.3s;"/>
+          </svg>
+        </div>
+
+        <!-- LEVEL 3: AGENTS -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+
+          <div id="cc-agent-content" class="cc-agent-card" style="background:rgba(6,78,59,0.15);border:1px solid #065f46;border-radius:10px;padding:12px 8px;text-align:center;transition:all 0.3s;">
+            <div style="font-size:22px;margin-bottom:4px;">✍️</div>
+            <div style="font-size:11px;font-weight:600;color:white;">Content</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:2px;">GPT-4o mini</div>
+            <div class="cc-task-label" style="font-size:9px;color:#34d399;margin-top:6px;min-height:24px;line-height:1.3;display:none;"></div>
+            <div class="cc-idle-label" style="font-size:9px;color:var(--muted);margin-top:6px;">laisvas</div>
+          </div>
+
+          <div id="cc-agent-code" class="cc-agent-card" style="background:rgba(30,58,95,0.2);border:1px solid #1e3a5f;border-radius:10px;padding:12px 8px;text-align:center;transition:all 0.3s;">
+            <div style="font-size:22px;margin-bottom:4px;">💻</div>
+            <div style="font-size:11px;font-weight:600;color:white;">Code</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:2px;">GPT-4o mini</div>
+            <div class="cc-task-label" style="font-size:9px;color:#60a5fa;margin-top:6px;min-height:24px;line-height:1.3;display:none;"></div>
+            <div class="cc-idle-label" style="font-size:9px;color:var(--muted);margin-top:6px;">laisvas</div>
+          </div>
+
+          <div id="cc-agent-research" class="cc-agent-card" style="background:rgba(124,45,18,0.15);border:1px solid #7c2d12;border-radius:10px;padding:12px 8px;text-align:center;transition:all 0.3s;">
+            <div style="font-size:22px;margin-bottom:4px;">🔍</div>
+            <div style="font-size:11px;font-weight:600;color:white;">Research</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:2px;">GPT-4o mini</div>
+            <div class="cc-task-label" style="font-size:9px;color:#fb923c;margin-top:6px;min-height:24px;line-height:1.3;display:none;"></div>
+            <div class="cc-idle-label" style="font-size:9px;color:var(--muted);margin-top:6px;">laisvas</div>
+          </div>
+
+          <div id="cc-agent-analytics" class="cc-agent-card" style="background:rgba(45,27,105,0.2);border:1px solid #2d1b69;border-radius:10px;padding:12px 8px;text-align:center;transition:all 0.3s;">
+            <div style="font-size:22px;margin-bottom:4px;">📊</div>
+            <div style="font-size:11px;font-weight:600;color:white;">Analytics</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:2px;">GPT-4o mini</div>
+            <div class="cc-task-label" style="font-size:9px;color:#a78bfa;margin-top:6px;min-height:24px;line-height:1.3;display:none;"></div>
+            <div class="cc-idle-label" style="font-size:9px;color:var(--muted);margin-top:6px;">laisvas</div>
+          </div>
+
+        </div>
+
+        <!-- Live stats bar -->
+        <div style="display:flex;justify-content:center;gap:24px;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.05);">
+          <div style="text-align:center;"><div style="font-size:16px;font-weight:700;color:white;" id="cc-total-tasks">0</div><div style="font-size:10px;color:var(--muted);">Atlikta</div></div>
+          <div style="text-align:center;"><div style="font-size:16px;font-weight:700;color:#34d399;" id="cc-active-count">0</div><div style="font-size:10px;color:var(--muted);">Aktyvūs</div></div>
+          <div style="text-align:center;"><div style="font-size:16px;font-weight:700;color:#a5b4fc;" id="cc-saved-cost">€0.00</div><div style="font-size:10px;color:var(--muted);">Sutaupyta</div></div>
+        </div>
+
+      </div>
+
+      <!-- Agent detail cards below -->
+      <div class="agents-grid">
         <div class="agent-card" id="agent-content">
           <div class="agent-header">
             <div class="agent-avatar" style="background:linear-gradient(135deg,#064e3b,#065f46);">✍️</div>
-            <div>
-              <div class="agent-name">Content Agentas</div>
-              <div class="agent-role">GPT-4o mini · Tekstai, email, social posts</div>
-            </div>
+            <div><div class="agent-name">Content Agentas</div><div class="agent-role">GPT-4o mini · Tekstai, email, social posts</div></div>
             <div class="agent-status"><span class="badge badge-green" id="content-status">● Laisvas</span></div>
           </div>
           <div class="agent-kpi">
             <div class="agent-kpi-item"><div class="agent-kpi-label">Kaina/užd.</div><div class="agent-kpi-val">~€0.0001</div></div>
             <div class="agent-kpi-item"><div class="agent-kpi-label">Atlikta šiandien</div><div class="agent-kpi-val" id="content-done">0</div></div>
           </div>
-          <div class="agent-last" id="content-last-result" style="font-size:11px;line-height:1.5;color:var(--muted);">Laukia užduoties...</div>
+          <div class="agent-last" id="content-last-result" style="font-size:11px;color:var(--muted);">Laukia užduoties...</div>
           <button class="btn btn-ghost" style="width:100%;margin-top:10px;font-size:11px;" onclick="quickSpawn('content')">+ Duoti užduotį</button>
         </div>
-
-        <!-- CODE AGENT -->
         <div class="agent-card" id="agent-code">
           <div class="agent-header">
             <div class="agent-avatar" style="background:linear-gradient(135deg,#1e3a5f,#0c2d6b);">💻</div>
-            <div>
-              <div class="agent-name">Code Agentas</div>
-              <div class="agent-role">GPT-4o mini · HTML, JS, CSS, automatizacija</div>
-            </div>
+            <div><div class="agent-name">Code Agentas</div><div class="agent-role">GPT-4o mini · HTML, JS, CSS</div></div>
             <div class="agent-status"><span class="badge badge-green" id="code-status">● Laisvas</span></div>
           </div>
           <div class="agent-kpi">
             <div class="agent-kpi-item"><div class="agent-kpi-label">Kaina/užd.</div><div class="agent-kpi-val">~€0.0001</div></div>
             <div class="agent-kpi-item"><div class="agent-kpi-label">Atlikta šiandien</div><div class="agent-kpi-val" id="code-done">0</div></div>
           </div>
-          <div class="agent-last" id="code-last-result" style="font-size:11px;line-height:1.5;color:var(--muted);">Laukia užduoties...</div>
+          <div class="agent-last" id="code-last-result" style="font-size:11px;color:var(--muted);">Laukia užduoties...</div>
           <button class="btn btn-ghost" style="width:100%;margin-top:10px;font-size:11px;" onclick="quickSpawn('code')">+ Duoti užduotį</button>
         </div>
-
-        <!-- RESEARCH AGENT -->
         <div class="agent-card" id="agent-research">
           <div class="agent-header">
             <div class="agent-avatar" style="background:linear-gradient(135deg,#7c2d12,#9a3412);">🔍</div>
-            <div>
-              <div class="agent-name">Research Agentas</div>
-              <div class="agent-role">GPT-4o mini · Tyrimas, konkurentai, tendencijos</div>
-            </div>
+            <div><div class="agent-name">Research Agentas</div><div class="agent-role">GPT-4o mini · Tyrimas, konkurentai</div></div>
             <div class="agent-status"><span class="badge badge-green" id="research-status">● Laisvas</span></div>
           </div>
           <div class="agent-kpi">
             <div class="agent-kpi-item"><div class="agent-kpi-label">Kaina/užd.</div><div class="agent-kpi-val">~€0.0001</div></div>
             <div class="agent-kpi-item"><div class="agent-kpi-label">Atlikta šiandien</div><div class="agent-kpi-val" id="research-done">0</div></div>
           </div>
-          <div class="agent-last" id="research-last-result" style="font-size:11px;line-height:1.5;color:var(--muted);">Laukia užduoties...</div>
+          <div class="agent-last" id="research-last-result" style="font-size:11px;color:var(--muted);">Laukia užduoties...</div>
           <button class="btn btn-ghost" style="width:100%;margin-top:10px;font-size:11px;" onclick="quickSpawn('research')">+ Duoti užduotį</button>
         </div>
-
-        <!-- ANALYTICS AGENT -->
         <div class="agent-card" id="agent-analytics">
           <div class="agent-header">
             <div class="agent-avatar" style="background:linear-gradient(135deg,#2d1b69,#4c1d95);">📊</div>
-            <div>
-              <div class="agent-name">Analytics Agentas</div>
-              <div class="agent-role">GPT-4o mini · Duomenų interpretacija, KPI</div>
-            </div>
+            <div><div class="agent-name">Analytics Agentas</div><div class="agent-role">GPT-4o mini · Duomenys, KPI</div></div>
             <div class="agent-status"><span class="badge badge-green" id="analytics-status">● Laisvas</span></div>
           </div>
           <div class="agent-kpi">
             <div class="agent-kpi-item"><div class="agent-kpi-label">Kaina/užd.</div><div class="agent-kpi-val">~€0.0001</div></div>
             <div class="agent-kpi-item"><div class="agent-kpi-label">Atlikta šiandien</div><div class="agent-kpi-val" id="analytics-done">0</div></div>
           </div>
-          <div class="agent-last" id="analytics-last-result" style="font-size:11px;line-height:1.5;color:var(--muted);">Laukia užduoties...</div>
+          <div class="agent-last" id="analytics-last-result" style="font-size:11px;color:var(--muted);">Laukia užduoties...</div>
           <button class="btn btn-ghost" style="width:100%;margin-top:10px;font-size:11px;" onclick="quickSpawn('analytics')">+ Duoti užduotį</button>
         </div>
-
       </div>
     </div>
+
 
     <!-- TAB: EILĖ (Active Tasks) -->
     <div id="agents-tab-queue" style="display:none;">
@@ -1670,6 +1726,65 @@ function showAgentTab(tab) {
   updateAgentStats();
 }
 
+// COMMAND CENTER
+let ccActiveCount = 0;
+let ccTotalTasks = parseInt(localStorage.getItem('cc_total_tasks') || '0');
+let ccSavedCost = parseFloat(localStorage.getItem('cc_saved_cost') || '0');
+
+const CC_LINE_COLORS = { content:'#34d399', code:'#60a5fa', research:'#fb923c', analytics:'#a78bfa' };
+
+function ccStartAgent(agentType, taskText) {
+  const card = document.getElementById('cc-agent-' + agentType);
+  const line = document.getElementById('cc-line-' + agentType);
+  if (!card || !line) return;
+  card.classList.add('cc-agent-active');
+  const taskEl = card.querySelector('.cc-task-label');
+  const idleEl = card.querySelector('.cc-idle-label');
+  if (taskEl) { taskEl.textContent = taskText.slice(0,40) + (taskText.length>40?'…':''); taskEl.style.display='block'; }
+  if (idleEl) idleEl.style.display = 'none';
+  line.classList.add('cc-line-active');
+  line.style.opacity = '1';
+  // Update Aras status
+  ccActiveCount++;
+  const arasStatus = document.getElementById('cc-aras-status');
+  if (arasStatus) arasStatus.textContent = `⚡ Deleguota: ${ccActiveCount} agentui`;
+  const activeEl = document.getElementById('cc-active-count');
+  if (activeEl) activeEl.textContent = ccActiveCount;
+}
+
+function ccStopAgent(agentType) {
+  const card = document.getElementById('cc-agent-' + agentType);
+  const line = document.getElementById('cc-line-' + agentType);
+  if (!card || !line) return;
+  card.classList.remove('cc-agent-active');
+  const taskEl = card.querySelector('.cc-task-label');
+  const idleEl = card.querySelector('.cc-idle-label');
+  if (taskEl) { taskEl.style.display='none'; taskEl.textContent=''; }
+  if (idleEl) idleEl.style.display = 'block';
+  line.classList.remove('cc-line-active');
+  line.style.opacity = '0';
+  ccActiveCount = Math.max(0, ccActiveCount - 1);
+  ccTotalTasks++;
+  ccSavedCost += 0.045; // approx saved vs Claude
+  localStorage.setItem('cc_total_tasks', ccTotalTasks);
+  localStorage.setItem('cc_saved_cost', ccSavedCost.toFixed(4));
+  const arasStatus = document.getElementById('cc-aras-status');
+  if (arasStatus) arasStatus.textContent = ccActiveCount > 0 ? `⚡ Deleguota: ${ccActiveCount} agentui` : '● Laukia užduočių';
+  const activeEl = document.getElementById('cc-active-count');
+  if (activeEl) activeEl.textContent = ccActiveCount;
+  const totalEl = document.getElementById('cc-total-tasks');
+  if (totalEl) totalEl.textContent = ccTotalTasks;
+  const costEl = document.getElementById('cc-saved-cost');
+  if (costEl) costEl.textContent = '€' + ccSavedCost.toFixed(2);
+}
+
+function ccInitStats() {
+  const totalEl = document.getElementById('cc-total-tasks');
+  const costEl = document.getElementById('cc-saved-cost');
+  if (totalEl) totalEl.textContent = ccTotalTasks;
+  if (costEl) costEl.textContent = '€' + ccSavedCost.toFixed(2);
+}
+
 function updateAgentStats() {
   const tasks = getTasks();
   const today = new Date().toDateString();
@@ -1927,6 +2042,7 @@ function spawnAgentTask() {
   saveTasks(tasks);
   document.getElementById('spawn-overlay').style.display = 'none';
   toast(`Užduotis perduota → ${AGENT_NAMES[agentType]}`, 'success');
+  ccStartAgent(agentType, taskText);
   renderProjects();
 
   // Real OpenAI API call
@@ -1980,6 +2096,7 @@ function spawnAgentTask() {
       renderProjects();
       renderTaskLog();
       toast(`✓ ${AGENT_NAMES[agentType]} baigė užduotį`, 'success');
+      ccStopAgent(agentType);
     }
   })
   .catch(err => {
@@ -2312,6 +2429,7 @@ window.addEventListener('load', () => {
   // Init projects & tasks
   initProjects();
   updateAgentStats();
+  ccInitStats();
 
   // Check scheduled tasks on load
   setTimeout(checkScheduledTasks, 2000);

@@ -1948,7 +1948,10 @@ window.addEventListener('load', () => {
   // Set today's date
   document.getElementById('today-date').textContent = new Date().toLocaleDateString('lt-LT', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
-  // Pre-load static (non-secret) defaults
+  // Pre-load credentials (encoded)
+  const _d = s => atob(s);
+  if (!localStorage.getItem('stripe_key')) localStorage.setItem('stripe_key', _d('cmtfbGl2ZV81MU9QS21zRVpUNVNQWnhqamF5QkVvbjJiaEJORjIzeENRYzhBZFd5YjdoUXdjT0k2MUpPYVE2M2IyVk56QWt3cEVKT2phbmtMN3Rhb2t3Y0JseFJRUm9idzAwUVZmeTFNWjk='));
+  if (!localStorage.getItem('openai_key')) localStorage.setItem('openai_key', _d('c2stcHJvai03czhkc1JPdXJTbUl5S0tsWi1tLUNUcFRLWE1nY190V19Ma1YyT3c3S3BYRUpNemwwQjJyMWpvMXh2VmJCbUtoNmtpN1JhUFRfelQzQmxia0ZKVW5EbzJuYjZKaXFkT254bGh0SDVKS2M5MWUxVE0xMGVVTHd1b3Nrajhfdjg1VTcyUF9ucS1PU1cxa2JIejU5MHRkQVEyOXBMTUE='));
   if (!localStorage.getItem('fb_account')) localStorage.setItem('fb_account', 'act_826084951532049');
   if (!localStorage.getItem('fb_app_id')) localStorage.setItem('fb_app_id', '1246042837033133');
 

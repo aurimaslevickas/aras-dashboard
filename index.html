@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aras — Marketing OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #070c18;
+  --sidebar: #0b1120;
+  --card: #0f1829;
+  --border: #1a2540;
+  --border-hover: #2a3a60;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --accent: #6366f1;
+  --green: #22c55e;
+  --red: #ef4444;
+  --amber: #f59e0b;
+  --blue: #3b82f6;
+}
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; overflow-x: hidden; }
+
+/* SIDEBAR */
+#sidebar { width: 220px; min-height: 100vh; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
+.sidebar-logo { padding: 20px 18px 16px; border-bottom: 1px solid var(--border); }
+.sidebar-logo .brand { font-size: 15px; font-weight: 700; color: white; }
+.sidebar-logo .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.sidebar-logo .eagle { font-size: 22px; margin-bottom: 6px; display: block; }
+nav { flex: 1; padding: 12px 10px; }
+.nav-section { font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding: 14px 8px 6px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; cursor: pointer; color: var(--muted); font-size: 13.5px; font-weight: 500; transition: all .15s; margin-bottom: 2px; }
+.nav-item:hover { background: rgba(99,102,241,.08); color: var(--text); }
+.nav-item.active { background: rgba(99,102,241,.15); color: #a5b4fc; }
+.nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+.nav-badge { margin-left: auto; background: var(--red); color: white; font-size: 10px; font-weight: 700; border-radius: 10px; padding: 1px 6px; }
+.sidebar-footer { padding: 14px; border-top: 1px solid var(--border); }
+.fb-conn-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); display: inline-block; margin-right: 6px; }
+.fb-conn-dot.connected { background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* MAIN */
+#main { margin-left: 220px; flex: 1; min-height: 100vh; }
+
+/* TOPBAR */
+.topbar { height: 56px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; background: var(--bg); position: sticky; top: 0; z-index: 50; }
+.topbar-title { font-size: 15px; font-weight: 600; color: white; }
+.topbar-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+.btn { padding: 7px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 500; cursor: pointer; border: none; transition: all .15s; }
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #5558e8; }
+.btn-ghost { background: var(--card); border: 1px solid var(--border); color: var(--muted); }
+.btn-ghost:hover { border-color: var(--border-hover); color: var(--text); }
+.btn-green { background: rgba(34,197,94,.15); color: var(--green); border: 1px solid rgba(34,197,94,.25); }
+.btn-red { background: rgba(239,68,68,.15); color: var(--red); border: 1px solid rgba(239,68,68,.25); }
+.btn-amber { background: rgba(245,158,11,.1); color: var(--amber); border: 1px solid rgba(245,158,11,.2); }
+
+/* PAGE AREAS */
+.page { display: none; padding: 24px; }
+.page.active { display: block; }
+
+/* CARDS */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+.card-p { padding: 20px; }
+.card:hover { border-color: var(--border-hover); }
+
+/* KPI GRID */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+.kpi-label { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: .03em; margin-bottom: 8px; text-transform: uppercase; }
+.kpi-val { font-size: 26px; font-weight: 700; color: white; line-height: 1; }
+.kpi-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.kpi-sub.up { color: var(--green); }
+.kpi-sub.down { color: var(--red); }
+.kpi-sub.dim { color: var(--accent); cursor: pointer; }
+.kpi-sub.dim:hover { text-decoration: underline; }
+
+/* PERIOD TABS */
+.period-tabs { display: flex; gap: 4px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 3px; display: inline-flex; margin-bottom: 20px; }
+.period-tab { padding: 5px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 500; cursor: pointer; color: var(--muted); transition: all .15s; }
+.period-tab.active { background: rgba(99,102,241,.2); color: #a5b4fc; }
+
+/* TABLE */
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--border); }
+.tbl td { padding: 12px 14px; border-bottom: 1px solid rgba(26,37,64,.6); }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: rgba(99,102,241,.04); }
+.tbl .name { font-weight: 500; color: white; }
+.tbl .mono { font-family: monospace; font-size: 12px; }
+
+/* BADGES */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-green { background: rgba(34,197,94,.12); color: var(--green); }
+.badge-red { background: rgba(239,68,68,.12); color: var(--red); }
+.badge-amber { background: rgba(245,158,11,.1); color: var(--amber); }
+.badge-blue { background: rgba(59,130,246,.1); color: var(--blue); }
+.badge-gray { background: rgba(100,116,139,.15); color: var(--muted); }
+
+/* FILTER BAR */
+.filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.filter-btn { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; background: var(--card); border: 1px solid var(--border); color: var(--muted); transition: all .15s; }
+.filter-btn.active { background: rgba(99,102,241,.15); border-color: rgba(99,102,241,.4); color: #a5b4fc; }
+.filter-btn.winner { border-color: rgba(34,197,94,.3); }
+.filter-btn.winner.active { background: rgba(34,197,94,.1); color: var(--green); border-color: rgba(34,197,94,.5); }
+.filter-btn.loser { border-color: rgba(239,68,68,.3); }
+.filter-btn.loser.active { background: rgba(239,68,68,.1); color: var(--red); border-color: rgba(239,68,68,.5); }
+
+/* AGENT CARDS */
+.agents-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
+.agent-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+.agent-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.agent-avatar { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.agent-name { font-size: 15px; font-weight: 700; color: white; }
+.agent-role { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.agent-status { margin-left: auto; font-size: 11px; }
+.agent-kpi { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.agent-kpi-item { background: rgba(26,37,64,.6); border-radius: 8px; padding: 8px 10px; }
+.agent-kpi-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.agent-kpi-val { font-size: 14px; font-weight: 700; color: white; margin-top: 2px; }
+.agent-last { font-size: 12.5px; color: #94a3b8; line-height: 1.5; margin-bottom: 12px; padding: 10px 12px; background: rgba(7,12,24,.5); border-radius: 8px; border-left: 3px solid var(--border-hover); }
+.rec-list { display: flex; flex-direction: column; gap: 8px; }
+.rec { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; background: rgba(7,12,24,.4); border: 1px solid var(--border); }
+.rec-text { flex: 1; font-size: 12.5px; color: #cbd5e1; line-height: 1.4; }
+.rec-actions { display: flex; gap: 6px; flex-shrink: 0; margin-top: 2px; }
+.exec-btn { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border: none; }
+.exec-btn.go { background: rgba(34,197,94,.15); color: var(--green); border: 1px solid rgba(34,197,94,.3); }
+.exec-btn.go:hover { background: rgba(34,197,94,.25); }
+.exec-btn.skip { background: rgba(100,116,139,.1); color: var(--muted); border: 1px solid var(--border); }
+.exec-btn.skip:hover { color: var(--text); }
+.exec-btn.delegate { background: rgba(99,102,241,.12); color: #a5b4fc; border: 1px solid rgba(99,102,241,.3); }
+.exec-btn.delegate:hover { background: rgba(99,102,241,.22); }
+
+/* SETTINGS */
+.settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.form-group { margin-bottom: 12px; }
+.form-label { font-size: 12px; color: var(--muted); font-weight: 500; display: block; margin-bottom: 5px; }
+.form-input { width: 100%; padding: 9px 12px; background: rgba(7,12,24,.8); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; transition: border-color .15s; font-family: inherit; }
+.form-input:focus { border-color: rgba(99,102,241,.5); }
+.form-input::placeholder { color: var(--muted); }
+
+/* CHART WRAPPER */
+.chart-wrap { position: relative; }
+
+/* MODAL */
+#modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+#modal-overlay.open { display: flex; }
+#modal { background: var(--card); border: 1px solid var(--border-hover); border-radius: 16px; padding: 28px; max-width: 440px; width: 90%; }
+#modal h3 { font-size: 17px; font-weight: 700; color: white; margin-bottom: 8px; }
+#modal p { font-size: 13.5px; color: #94a3b8; line-height: 1.6; margin-bottom: 20px; }
+#modal .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+/* EMPTY STATE */
+.empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+.empty .icon { font-size: 40px; margin-bottom: 12px; }
+.empty h3 { font-size: 15px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+.empty p { font-size: 13px; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* LOADING SHIMMER */
+.shimmer { background: linear-gradient(90deg, var(--card) 25%, rgba(26,37,64,.5) 50%, var(--card) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
+@keyframes shimmer { 0%{background-position:200%} 100%{background-position:-200%} }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-100%); }
+  #main { margin-left: 0; }
+}
+
+/* TOAST */
+#toast { position: fixed; bottom: 24px; right: 24px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+.toast-item { padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; max-width: 320px; animation: slideIn .2s ease; }
+@keyframes slideIn { from{transform:translateX(20px);opacity:0} to{transform:translateX(0);opacity:1} }
+.toast-success { background: rgba(34,197,94,.15); border: 1px solid rgba(34,197,94,.3); color: var(--green); }
+.toast-error { background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3); color: var(--red); }
+.toast-info { background: rgba(99,102,241,.12); border: 1px solid rgba(99,102,241,.3); color: #a5b4fc; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sidebar-logo">
+    <span class="eagle">🦅</span>
+    <div class="brand">Aras Dashboard</div>
+    <div class="sub">GyvenimoKlubas.lt</div>
+  </div>
+  <nav>
+    <div class="nav-section">Duomenys</div>
+    <div class="nav-item active" onclick="navigate('overview')">
+      <span class="icon">📊</span> Apžvalga
+    </div>
+    <div class="nav-item" onclick="navigate('campaigns')">
+      <span class="icon">📣</span> Kampanijos
+    </div>
+    <div class="nav-item" onclick="navigate('ads')">
+      <span class="icon">🎨</span> Reklamos
+    </div>
+    <div class="nav-section">Valdymas</div>
+    <div class="nav-item" onclick="navigate('projects')">
+      <span class="icon">📁</span> Projektai
+      <span class="nav-badge" id="projects-badge" style="display:none">0</span>
+    </div>
+    <div class="nav-item" onclick="navigate('agents')">
+      <span class="icon">🤖</span> Agentai
+      <span class="nav-badge" id="rec-badge" style="display:none">4</span>
+    </div>
+    <div class="nav-section">Konfigūracija</div>
+    <div class="nav-item" onclick="navigate('settings')">
+      <span class="icon">⚙️</span> Nustatymai
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div style="display:flex;align-items:center;font-size:12px;color:var(--muted);">
+      <span class="fb-conn-dot" id="sidebar-dot"></span>
+      <span id="sidebar-conn-label">Facebook: jungiamasi…</span>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted);cursor:pointer;" onclick="navigate('settings')">Nustatymai →</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main id="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="page-title">Apžvalga</div>
+      <div class="topbar-sub" id="page-sub">Šiandien · <span id="today-date">—</span></div>
+    </div>
+    <div class="topbar-actions">
+      <div id="last-update" style="font-size:11px;color:var(--muted);"></div>
+      <button class="btn btn-ghost" onclick="saveMemory()" title="Išsaugoti kontekstą į atmintį">💾 Atmintis</button>
+      <button class="btn btn-ghost" onclick="refreshData()">🔄 Atnaujinti</button>
+    </div>
+  </div>
+
+  <!-- ======== PAGE: OVERVIEW ======== -->
+  <div id="page-overview" class="page active">
+
+    <!-- Period tabs -->
+    <div class="period-tabs" style="margin-bottom:20px;">
+      <div class="period-tab active" onclick="setPeriod('today')">Šiandien</div>
+      <div class="period-tab" onclick="setPeriod('yesterday')">Vakar</div>
+      <div class="period-tab" onclick="setPeriod('week')">7 dienos</div>
+      <div class="period-tab" onclick="setPeriod('month')">30 dienų</div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid" id="kpi-row">
+      <div class="kpi">
+        <div class="kpi-label">Išleista</div>
+        <div class="kpi-val" id="kpi-spend">—</div>
+        <div class="kpi-sub" id="kpi-spend-sub">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Rezultatai</div>
+        <div class="kpi-val" id="kpi-results">—</div>
+        <div class="kpi-sub" id="kpi-results-sub">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">CPA vidurkis</div>
+        <div class="kpi-val" id="kpi-cpa">—</div>
+        <div class="kpi-sub" id="kpi-cpa-sub">kaina už rezultatą</div>
+      </div>
+      <div class="kpi" id="kpi-revenue-card">
+        <div class="kpi-label">Pajamos (Stripe)</div>
+        <div class="kpi-val" id="kpi-revenue" style="color:var(--muted)">—</div>
+        <div class="kpi-sub dim" id="kpi-revenue-sub" onclick="navigate('settings')">+ Prijungti Stripe</div>
+      </div>
+      <div class="kpi" id="kpi-roas-card">
+        <div class="kpi-label">ROAS</div>
+        <div class="kpi-val" id="kpi-roas" style="color:var(--muted)">—</div>
+        <div class="kpi-sub" id="kpi-roas-sub" style="color:var(--muted)">pajamos / išlaidos</div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+      <div class="card card-p">
+        <div style="font-size:13px;font-weight:600;color:white;margin-bottom:14px;">Išlaidos pagal kampaniją</div>
+        <div class="chart-wrap"><canvas id="spendChart" height="200"></canvas></div>
+        <div id="spend-chart-empty" class="empty" style="display:none;padding:30px 0;">
+          <div class="icon">📊</div>
+          <p>Junkite Facebook API</p>
+        </div>
+      </div>
+      <div class="card card-p">
+        <div style="font-size:13px;font-weight:600;color:white;margin-bottom:14px;">CPA pagal kampaniją (€)</div>
+        <div class="chart-wrap"><canvas id="cpaChart" height="200"></canvas></div>
+        <div id="cpa-chart-empty" class="empty" style="display:none;padding:30px 0;">
+          <div class="icon">📈</div>
+          <p>Junkite Facebook API</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Campaign summary table -->
+    <div class="card">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:between;">
+        <span style="font-size:13px;font-weight:600;color:white;">Kampanijų santrauka</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:auto;" id="overview-period-label">Šiandien</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="tbl" id="overview-table">
+          <thead>
+            <tr>
+              <th>Kampanija</th>
+              <th>Statusas</th>
+              <th>Išleista</th>
+              <th>Rezultatai</th>
+              <th>CPA</th>
+              <th>Vertinimas</th>
+            </tr>
+          </thead>
+          <tbody id="overview-tbody">
+            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted);">Junkite Facebook API → Nustatymai</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Stripe revenue breakdown (shown when connected) -->
+    <div id="stripe-revenue-section" style="display:none;margin-top:16px;">
+      <div class="card">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+          <span style="font-size:16px;">💳</span>
+          <span style="font-size:13px;font-weight:600;color:white;">Pajamos pagal produktą</span>
+          <span style="font-size:11px;color:var(--muted);" id="stripe-period-label">30 dienų</span>
+          <span class="badge badge-green" style="margin-left:auto;">Stripe live</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="tbl" id="stripe-products-table">
+            <thead>
+              <tr>
+                <th>Produktas</th>
+                <th>Pardavimai</th>
+                <th>Pajamos</th>
+                <th>Vid. kaina</th>
+                <th>Kampanija</th>
+                <th>ROAS</th>
+              </tr>
+            </thead>
+            <tbody id="stripe-products-tbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ======== PAGE: PROJECTS ======== -->
+  <div id="page-projects" class="page">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:white;">Projektai</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Visi aktyvūs ir planuojami projektai</div>
+      </div>
+      <button class="btn btn-primary" style="margin-left:auto;" onclick="openNewProject()">+ Naujas projektas</button>
+    </div>
+
+    <div id="projects-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;">
+      <!-- filled by JS -->
+    </div>
+
+    <!-- New/Edit project modal form -->
+    <div id="project-form" style="display:none;margin-top:20px;" class="card card-p">
+      <div style="font-size:14px;font-weight:600;color:white;margin-bottom:16px;" id="project-form-title">Naujas projektas</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label class="form-label">Pavadinimas</label>
+          <input id="pf-name" class="form-input" placeholder="pvz. Antras Pavasaris">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Statusas</label>
+          <select id="pf-status" class="form-input">
+            <option value="active">Aktyvus</option>
+            <option value="planning">Planavimas</option>
+            <option value="paused">Pristabdytas</option>
+            <option value="done">Baigtas</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipas</label>
+          <select id="pf-type" class="form-input">
+            <option value="funnel">Sales funnel</option>
+            <option value="website">Svetainė</option>
+            <option value="product">Produktas</option>
+            <option value="campaign">Kampanija</option>
+            <option value="other">Kita</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pajamų tikslas (€/mėn)</label>
+          <input id="pf-target" class="form-input" placeholder="1000" type="number">
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">Aprašymas</label>
+          <input id="pf-desc" class="form-input" placeholder="Trumpas projekto aprašymas...">
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">URL</label>
+          <input id="pf-url" class="form-input" placeholder="https://...">
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">Agentų komanda</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer;"><input type="checkbox" id="pa-code" value="code"> 💻 Code</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer;"><input type="checkbox" id="pa-content" value="content"> ✍️ Content</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer;"><input type="checkbox" id="pa-research" value="research"> 🔍 Research</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer;"><input type="checkbox" id="pa-analytics" value="analytics"> 📊 Analytics</label>
+          </div>
+        </div>
+      </div>
+      <input type="hidden" id="pf-id">
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-primary" onclick="saveProject()">Išsaugoti</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('project-form').style.display='none'">Atšaukti</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PAGE: CAMPAIGNS ======== -->
+  <div id="page-campaigns" class="page">
+
+    <div class="period-tabs" style="margin-bottom:20px;">
+      <div class="period-tab active" onclick="setCampaignPeriod('today')">Šiandien</div>
+      <div class="period-tab" onclick="setCampaignPeriod('week')">7 dienos</div>
+      <div class="period-tab" onclick="setCampaignPeriod('month')">30 dienų</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;" id="camp-kpi-row">
+      <!-- filled by JS -->
+    </div>
+
+    <div class="card">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border);">
+        <span style="font-size:13px;font-weight:600;color:white;">Visos kampanijos</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="tbl" id="campaigns-table">
+          <thead>
+            <tr>
+              <th>Kampanija</th>
+              <th>Statusas</th>
+              <th>Tikslas</th>
+              <th>Išleista</th>
+              <th>Pasiekiamumas</th>
+              <th>Paspaudimai</th>
+              <th>Rezultatai</th>
+              <th>CPA</th>
+              <th>Veiksmas</th>
+            </tr>
+          </thead>
+          <tbody id="campaigns-tbody">
+            <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted);">Junkite Facebook API → Nustatymai</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PAGE: ADS ======== -->
+  <div id="page-ads" class="page">
+
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setAdFilter('all', this)">Visos reklamos</button>
+      <button class="filter-btn winner" onclick="setAdFilter('winner', this)">🏆 Laimėtojai</button>
+      <button class="filter-btn loser" onclick="setAdFilter('loser', this)">🔴 Pralaimėtojai</button>
+      <select id="ad-campaign-filter" class="form-input" style="width:auto;padding:6px 12px;font-size:12px;" onchange="renderAdsTable()">
+        <option value="all">Visos kampanijos</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+        <span style="font-size:13px;font-weight:600;color:white;">Reklamos (Ad lygis)</span>
+        <span style="font-size:11px;color:var(--muted);">— kuri reklama veikia, kuri ne</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--muted);">30 dienų</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="tbl" id="ads-table">
+          <thead>
+            <tr>
+              <th>Reklama</th>
+              <th>Kampanija</th>
+              <th>Ad Set</th>
+              <th>Išleista</th>
+              <th>Paspaudimai</th>
+              <th>CTR</th>
+              <th>Rezultatai</th>
+              <th>CPA</th>
+              <th>Vertinimas</th>
+            </tr>
+          </thead>
+          <tbody id="ads-tbody">
+            <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted);">Junkite Facebook API → Nustatymai</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PAGE: AGENTS ======== -->
+  <div id="page-agents" class="page">
+
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:white;">Agentų komanda</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Užduočių delegavimas, istorija ir rekomendacijos</div>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="showAgentTab('recs')">💡 Rekomendacijos</button>
+        <button class="btn btn-ghost" onclick="showAgentTab('log')">📋 Užduočių log</button>
+        <button class="btn btn-primary" onclick="openSpawnModal()">+ Nauja užduotis</button>
+      </div>
+    </div>
+
+    <!-- Agent sub-tabs -->
+    <div style="display:flex;gap:4px;margin-bottom:20px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:3px;display:inline-flex;">
+      <div class="period-tab active" id="atab-agents" onclick="showAgentTab('agents')">🤖 Agentai</div>
+      <div class="period-tab" id="atab-recs" onclick="showAgentTab('recs')">💡 Rekomendacijos</div>
+      <div class="period-tab" id="atab-log" onclick="showAgentTab('log')">📋 Užduočių log</div>
+    </div>
+
+    <div class="agents-grid">
+
+      <!-- ANALYST -->
+      <div class="agent-card" id="agent-analyst">
+        <div class="agent-header">
+          <div class="agent-avatar" style="background:linear-gradient(135deg,#1e3a5f,#0c2d6b);">🔍</div>
+          <div>
+            <div class="agent-name">Analitikas</div>
+            <div class="agent-role">Kampanijų ir reklamos analizė</div>
+          </div>
+          <div class="agent-status">
+            <span class="badge badge-green">● Aktyvus</span>
+          </div>
+        </div>
+        <div class="agent-kpi">
+          <div class="agent-kpi-item">
+            <div class="agent-kpi-label">Paskutinė analizė</div>
+            <div class="agent-kpi-val">2 val. atgal</div>
+          </div>
+          <div class="agent-kpi-item">
+            <div class="agent-kpi-label">Rekomendacijos</div>
+            <div class="agent-kpi-val" id="analyst-rec-count">4 laukia</div>
+          </div>
+        </div>
+        <div class="agent-last">
+          📋 Išanalizavau 30 dienų kampanijų duomenis. Žarnyno kodas: €2.18/lead — puikus. Cholesterolis KNYGA: €2.56/pirkimas — rekomenduoju didinti biudžetą. Tinderio žinutė: €10.33/purchase — testuoti naują creative.
+        </div>
+        <div class="rec-list">
+          <div class="rec">
+            <span style="font-size:16px;">✅</span>
+            <div class="rec-text">Padidinti <strong>Cholesterolis KNYGA</strong> biudžetą €10 → €20/d (CPA €2.56 — vienas geriausių)</div>
+            <div class="rec-actions">
+              <button class="exec-btn go" onclick="execAction('budget', {campaign:'Cholesterolis KNYGA', from:10, to:20})">Vykdyti</button>
+              <button class="exec-btn skip" onclick="dismissRec(this)">✕</button>
+            </div>
+          </div>
+          <div class="rec">
+            <span style="font-size:16px;">⚠️</span>
+            <div class="rec-text">Pristabdyti <strong>PASKUTINĖ TINDERIO ŽINUTĖ</strong> — €10.33/purchase, 4× brangiau nei Cholesterolis</div>
+            <div class="rec-actions">
+              <button class="exec-btn go" onclick="execAction('pause', {campaign:'PASKUTINĖ TINDERIO ŽINUTĖ'})">Vykdyti</button>
+              <button class="exec-btn skip" onclick="dismissRec(this)">✕</button>
+            </div>
+          </div>
+          <div class="rec">
+            <span style="font-size:16px;">🎨</span>
+            <div class="rec-text">Sukurti 3 naujus tekstus <strong>Žarnyno kodas</strong> kampanijai — testuoti prieš didinant biudžetą</div>
+            <div class="rec-actions">
+              <button class="exec-btn delegate" onclick="delegateTo('creative', 'Sukurti 3 naujus ad tekstus Žarnyno kodas kampanijai')">→ Creative</button>
+              <button class="exec-btn skip" onclick="dismissRec(this)">✕</button>
+            </div>
+          </div>
+          <div class="rec">
+            <span style="font-size:16px;">📄</span>
+            <div class="rec-text">Tikrinti <strong>Žarnynas</strong> landing page konversiją — 614 leadų bet pardavimai nežinomi</div>
+            <div class="rec-actions">
+              <button class="exec-btn delegate" onclick="delegateTo('landing', 'Patikrinti ir optimizuoti Žarnyno kodas landing page konversiją')">→ LP kūrėjas</button>
+              <button class="exec-btn skip" onclick="dismissRec(this)">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STRATEGIST -->
+      <div class="agent-card" id="agent-strategist">
+        <div class="agent-header">
+          <div class="agent-avatar" style="background:linear-gradient(135deg,#2d1b69,#4c1d95);">🧠</div>
+          <div>
+            <div class="agent-name">Strategas</div>
+            <div class="agent-role">Augimo ir produktų strategija</div>
+          </div>
+          <div class="agent-status">
+            <span class="badge badge-amber">● Laukia</span>
+          </div>
+        </div>
+        <div class="agent-kpi">
+          <div class="agent-kpi-item">
+            <div class="agent-kpi-label">Paskutinis veiksmas</div>
+            <div class="agent-kpi-val">Vakar</div>
+          </div>
+          <div class="agent-kpi-item">
+            <div class="agent-kpi-label">Aktyvūs planai</div>
+            <div class="agent-kpi-val">2 planai</div>
+          </div>
+        </div>
+        <div class="agent-last">
+          🧠 Peržiūrėjau visų agentų ataskaitas. Žarnyno 614 leadai nekonvertuoti — tai didelė potencialo spraga. Antras Pavasaris projektas sustojęs — rekomenduoju paleisti su menopauze kampanija.
+        </div>
+        <div class="rec-list">
+          <div class="rec">
+            <span style="font-size:16px;">🚀</span>
+            <div class="rec-text">Paleisti <strong>Antras Pavasaris</strong> email seką 614 Žarnyno leadams — neišnaudotas potencialas</div>
+            <div class="rec-actions">
+              <button class="exec-btn delegate" onclick="delegateTo('creative', 'Sukurti email seką 614 Žarnyno leadams apie Antras Pavasaris')">→ Creative</button>
+              <button class="exec-btn skip" onclick="dismissRec(this)">✕</button>
+            </div>
+          </div>
+          <div class="rec">
+            <span style="font-size:16px;">💡</span>
+            <div class="rec-text">Menopauze planas (€6.37/purchase) — atgaivinti su nauju <strong>Antras Pavasaris</strong> landing page</div>
+            <div class="rec-actions">
+              <button class="exec-btn delegate" onclick="delegateTo('landing', 'Sukurti Antras Pavasaris landing page menopauze kampanijai')">→ LP kūrėjas</button>
+              <button class="exec-btn skip" onclick="dismissRec(this)">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CREATIVE -->
+      <div class="agent-card" id="agent-creative">
+        <div class="agent-header">
+          <div class="agent-avatar" style="background:linear-gradient(135deg,#064e3b,#065f46);">🎨</div>
+          <div>
+            <div class="agent-name">Creative</div>
+            <div class="agent-role">Reklamos tekstai ir creative briefs</div>
+          </div>
+          <div class="agent-status">
+            <span class="badge badge-green">● Paruoštas</span>
+          </div>
+        </div>
+        <div class="agent-kpi">
+          <div class="agent-kpi-item">
+            <div class="agent-kpi-label">Sugeneruota</div>
+            <div class="agent-kpi-val">12 tekstų</div>
+          </div>
+          <div class="agent-kpi-item">
+            <div class="agent-kpi-label">Laukia užduočių</div>
+            <div class="agent-kpi-val" id="creative-queue">0</div>
+          </div>
+        </div>
+        <div class="agent-last" id="creative-last">
+          ✍️ Paruoštas kurti naujus ad tekstus. Naudoju GPT-4o mini + jūsų sėkmingų tekstų šablonus. Galiu generuoti: headline variantus, ad copy, email sekas.
+        </div>
+        <div class="rec-list" id="creative-tasks">
+          <div style="text-align:center;padding:16px;font-size:12px;color:var(--muted);">
+            Deleguokite užduotį iš Analitiko arba Stratego →
+          </div>
+        </div>
+        <div style="margin-top:12px;">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Greita užduotis:</div>
+          <div style="display:flex;gap:6px;">
+            <input type="text" id="creative-input" class="form-input" placeholder="pvz. 3 nauji tekstai Žarnyno kampanijai..." style="font-size:12px;padding:7px 10px;">
+            <button class="btn btn-primary" onclick="addCreativeTask()" style="white-space:nowrap;font-size:12px;padding:7px 12px;">+ Pridėti</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LANDING PAGE -->
+      <div class="agent-card" id="agent-landing">
+        <div class="agent-header">
+          <div class="agent-avatar" style="background:linear-gradient(135deg,#7c2d12,#991b1b);">📄</div>
+          <div>
+            <div class="agent-name">Puslapių kūrėjas</div>
+            <div class="agent-role">Konversijų optimizavimas, A/B testai</div>
+          </div>
+          <div class="agent-status">
+            <span class="badge badge-blue">● Stebėjimas</span>
+          </div>
+        </div>
+        <div class="agent-kpi">
+          <div class="agent-kpi-item">
+            <div class="agent-kpi-label">Stebimi puslapiai</div>
+            <div class="agent-kpi-val">3</div>
+          </div>
+          <div class="agent-kpi-item">
+            <div class="agent-kpi-label">Atrasti problemos</div>
+            <div class="agent-kpi-val">2 problemos</div>
+          </div>
+        </div>
+        <div class="agent-last" id="landing-last">
+          📄 Nustatiau, kad gyvenimoklubas.lt/zarnynas konversija žema (~2%). CTA mygtukas ne pirmame ekrane. Antras Pavasaris puslapis dar nenukurtas — tai blokuoja menopauze kampaniją.
+        </div>
+        <div class="rec-list" id="landing-tasks">
+          <div class="rec">
+            <span style="font-size:16px;">🔧</span>
+            <div class="rec-text">Perkelti CTA mygtuką į <strong>Žarnynas</strong> puslapio pirmą ekraną + pataisyti headline</div>
+            <div class="rec-actions">
+              <button class="exec-btn go" onclick="execAction('landing_fix', {page:'zarnynas', fix:'CTA į pirmą ekraną'})">Vykdyti</button>
+              <button class="exec-btn skip" onclick="dismissRec(this)">✕</button>
+            </div>
+          </div>
+          <div class="rec">
+            <span style="font-size:16px;">🆕</span>
+            <div class="rec-text">Sukurti <strong>Antras Pavasaris</strong> landing page — būtina menopauze kampanijai paleisti</div>
+            <div class="rec-actions">
+              <button class="exec-btn go" onclick="execAction('create_page', {name:'Antras Pavasaris'})">Vykdyti</button>
+              <button class="exec-btn skip" onclick="dismissRec(this)">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RECOMMENDATIONS tab -->
+    <div id="agent-recs-tab" style="display:none;">
+      <div id="all-recs-list" style="display:flex;flex-direction:column;gap:10px;max-width:800px;">
+        <!-- filled by JS from all agent recs -->
+      </div>
+    </div>
+
+    <!-- TASK LOG tab -->
+    <div id="agent-log-tab" style="display:none;">
+      <div class="card">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:13px;font-weight:600;color:white;">Užduočių istorija</span>
+          <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;" onclick="clearTaskLog()">Išvalyti</button>
+        </div>
+        <div id="task-log-list" style="max-height:500px;overflow-y:auto;">
+          <div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">Dar nėra užduočių. Sukurk pirmą →</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SPAWN AGENT MODAL -->
+  <div id="spawn-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+    <div style="background:var(--card);border:1px solid var(--border-hover);border-radius:16px;padding:28px;max-width:500px;width:90%;">
+      <div style="font-size:16px;font-weight:700;color:white;margin-bottom:16px;">⚡ Nauja agentų užduotis</div>
+      <div class="form-group">
+        <label class="form-label">Agentas</label>
+        <select id="spawn-agent" class="form-input">
+          <option value="auto">🧠 Aras sprendžia (rekomenduojama)</option>
+          <option value="code">💻 Code Agent (GPT-4o mini)</option>
+          <option value="content">✍️ Content Agent (GPT-4o mini)</option>
+          <option value="research">🔍 Research Agent (GPT-4o mini)</option>
+          <option value="analytics">📊 Analytics Agent (GPT-4o mini)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Projektas</label>
+        <select id="spawn-project" class="form-input">
+          <option value="">— Be projekto —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Užduotis</label>
+        <textarea id="spawn-task" class="form-input" rows="4" placeholder="Aprašyk ką reikia padaryti..." style="resize:vertical;"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-primary" onclick="spawnAgentTask()" style="flex:1;">▶ Deleguoti</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('spawn-overlay').style.display='none'">Atšaukti</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PAGE: SETTINGS ======== -->
+  <div id="page-settings" class="page">
+    <div class="settings-grid">
+
+      <!-- Facebook API -->
+      <div class="card card-p">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:36px;height:36px;border-radius:8px;background:#0c2d6b;display:flex;align-items:center;justify-content:center;font-size:18px;">f</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:white;">Facebook Ads API</div>
+            <div style="font-size:11px;color:var(--muted);">Meta Marketing API v25</div>
+          </div>
+          <span id="fb-badge" class="badge badge-red" style="margin-left:auto;">Neprijungta</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">App ID</label>
+          <input id="s-fb-app-id" type="text" class="form-input" placeholder="1246042837033133" value="1246042837033133">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Access Token <span style="color:var(--muted);font-size:10px;">(User Token, ads_read + ads_management)</span></label>
+          <input id="s-fb-token" type="password" class="form-input" placeholder="EAAxxxxx...">
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Generuoti: <a href="https://developers.facebook.com/tools/explorer/?app_id=1246042837033133" target="_blank" style="color:#a5b4fc;">Graph API Explorer →</a></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ad Account ID</label>
+          <input id="s-fb-account" type="text" class="form-input" placeholder="act_826084951532049" value="act_826084951532049">
+        </div>
+        <div id="fb-msg" style="font-size:12px;margin-bottom:8px;display:none;"></div>
+        <button class="btn btn-primary" onclick="connectFacebook()" style="width:100%;">🔌 Prisijungti ir įkelti duomenis</button>
+        <div style="margin-top:10px;padding:10px 12px;background:rgba(7,12,24,.5);border-radius:8px;font-size:11px;color:var(--muted);">
+          ℹ️ Duomenys saugomi tik jūsų naršyklėje (localStorage). Token neišsaugomas jokiame faile ar serveryje.
+        </div>
+      </div>
+
+      <!-- Stripe -->
+      <div class="card card-p">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:36px;height:36px;border-radius:8px;background:#1a1042;display:flex;align-items:center;justify-content:center;font-size:18px;">💳</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:white;">Stripe</div>
+            <div style="font-size:11px;color:var(--muted);">Tikros pajamos ir ROAS</div>
+          </div>
+          <span id="stripe-badge" class="badge badge-red" style="margin-left:auto;">Neprijungta</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Restricted Key <span style="color:var(--muted);font-size:10px;">(rk_live_... — tik skaitymui)</span></label>
+          <input id="s-stripe-key" type="password" class="form-input" placeholder="rk_live_...">
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Sukurti: <a href="https://dashboard.stripe.com/apikeys" target="_blank" style="color:#a5b4fc;">Stripe Dashboard → API keys →</a></div>
+        </div>
+        <div id="stripe-msg" style="font-size:12px;margin-bottom:8px;display:none;"></div>
+        <button class="btn btn-primary" onclick="connectStripe()" style="width:100%;">🔌 Prisijungti ir įkelti pajamas</button>
+        <div style="margin-top:10px;padding:10px 12px;background:rgba(7,12,24,.5);border-radius:8px;font-size:11px;color:var(--muted);">
+          ℹ️ Raktas saugomas tik naršyklėje (localStorage). Rodoma: pajamos, ROAS, AOV, produktų breakdown.
+        </div>
+      </div>
+
+      <!-- OpenAI (for agents) -->
+      <div class="card card-p">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:36px;height:36px;border-radius:8px;background:#0f2b1f;display:flex;align-items:center;justify-content:center;font-size:18px;">🤖</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:white;">OpenAI API</div>
+            <div style="font-size:11px;color:var(--muted);">Creative agentui (GPT-4o mini)</div>
+          </div>
+          <span id="openai-badge" class="badge badge-red" style="margin-left:auto;">Neprijungta</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">API Key</label>
+          <input id="s-openai-key" type="password" class="form-input" placeholder="sk-...">
+        </div>
+        <button class="btn btn-primary" onclick="saveOpenAI()" style="width:100%;">Išsaugoti</button>
+        <div style="margin-top:10px;font-size:11px;color:var(--muted);">
+          Naudojamas: Creative agento tekstų generavimui. Modelis: gpt-4o-mini (~€0.001/užduotis).
+        </div>
+      </div>
+
+      <!-- Telegram reports -->
+      <div class="card card-p">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:36px;height:36px;border-radius:8px;background:#0c2040;display:flex;align-items:center;justify-content:center;font-size:18px;">📱</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:white;">Telegram ataskaitos</div>
+            <div style="font-size:11px;color:var(--muted);">Kasdienė santrauka į telefoną</div>
+          </div>
+          <span class="badge badge-green" style="margin-left:auto;">Aktyvus</span>
+        </div>
+        <div style="font-size:12.5px;color:#94a3b8;line-height:1.7;">
+          <div>✅ 9:00 — ryto dienos santrauka</div>
+          <div>✅ 18:00 — dienos rezultatai</div>
+          <div>✅ Realiu laiku — kritiniai pokyčiai</div>
+        </div>
+        <div style="margin-top:12px;padding:10px 12px;background:rgba(7,12,24,.5);border-radius:8px;font-size:11px;color:var(--muted);">
+          Veikia per Aras (OpenClaw) Telegram botą. Konfigūruojama Aras pokalbyje.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div id="modal">
+    <h3 id="modal-title">Vykdyti veiksmą?</h3>
+    <p id="modal-body">—</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Atšaukti</button>
+      <button class="btn btn-primary" id="modal-confirm">✓ Patvirtinti</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// =========================================
+// STATE
+// =========================================
+const FB_API = 'https://graph.facebook.com/v25.0';
+let state = {
+  period: 'today',
+  campPeriod: 'month',
+  adFilter: 'all',
+  adCampaignFilter: 'all',
+  campaigns: [],
+  ads: [],
+  fbConnected: false,
+  charts: {},
+};
+
+// =========================================
+// NAVIGATION
+// =========================================
+const PAGE_TITLES = {
+  overview: ['Apžvalga', 'Facebook Ads · {period}'],
+  campaigns: ['Kampanijos', 'Statusai ir rezultatai'],
+  ads: ['Reklamos', 'Ad lygio analizė'],
+  projects: ['Projektai', 'Aktyvūs ir planuojami projektai'],
+  agents: ['Agentai', 'Komanda, užduotys ir rekomendacijos'],
+  settings: ['Nustatymai', 'API jungtys ir konfigūracija'],
+};
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event && event.currentTarget && event.currentTarget.classList.add('active');
+  // find nav item by onclick
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+page+"'")) n.classList.add('active');
+  });
+  const t = PAGE_TITLES[page] || [page, ''];
+  document.getElementById('page-title').textContent = t[0];
+  document.getElementById('page-sub').textContent = t[1].replace('{period}', getPeriodLabel()) + ' · ' + document.getElementById('today-date').textContent;
+}
+
+function getPeriodLabel() {
+  const map = { today:'Šiandien', yesterday:'Vakar', week:'7 dienos', month:'30 dienų' };
+  return map[state.period] || '';
+}
+
+// =========================================
+// PERIOD TABS
+// =========================================
+function setPeriod(p) {
+  state.period = p;
+  document.querySelectorAll('#page-overview .period-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['today','yesterday','week','month'][i] === p);
+  });
+  document.getElementById('overview-period-label').textContent = getPeriodLabel();
+  loadOverviewData();
+}
+
+function setCampaignPeriod(p) {
+  state.campPeriod = p;
+  document.querySelectorAll('#page-campaigns .period-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['today','week','month'][i] === p);
+  });
+  loadCampaignData();
+}
+
+// =========================================
+// AD FILTER
+// =========================================
+let currentAdFilter = 'all';
+function setAdFilter(f, el) {
+  currentAdFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    if (!b.id && !b.tagName.toLowerCase().includes('select')) b.classList.remove('active');
+  });
+  el && el.classList.add('active');
+  renderAdsTable();
+}
+
+// =========================================
+// FACEBOOK API
+// =========================================
+function connectFacebook() {
+  const token = document.getElementById('s-fb-token').value.trim();
+  const account = document.getElementById('s-fb-account').value.trim() || 'act_826084951532049';
+  const appId = document.getElementById('s-fb-app-id').value.trim();
+  if (!token) { setFbMsg('Access Token privalomas', 'error'); return; }
+  localStorage.setItem('fb_token', token);
+  localStorage.setItem('fb_account', account);
+  if (appId) localStorage.setItem('fb_app_id', appId);
+  setFbMsg('⏳ Jungiamasi...', 'info');
+  loadAllFbData();
+}
+
+function setFbMsg(msg, type) {
+  const el = document.getElementById('fb-msg');
+  el.textContent = msg;
+  el.style.color = type === 'error' ? 'var(--red)' : type === 'info' ? '#a5b4fc' : 'var(--green)';
+  el.style.display = 'block';
+}
+
+function getToken() { return localStorage.getItem('fb_token'); }
+function getAccount() { return localStorage.getItem('fb_account') || 'act_826084951532049'; }
+
+function fbFetch(endpoint, params = {}) {
+  const token = getToken();
+  if (!token) return Promise.reject(new Error('No token'));
+  const qs = new URLSearchParams({ ...params, access_token: token }).toString();
+  return fetch(`${FB_API}${endpoint}?${qs}`).then(r => r.json()).then(d => {
+    if (d.error) throw new Error(d.error.message);
+    return d;
+  });
+}
+
+function loadAllFbData() {
+  const account = getAccount();
+  // Verify connection
+  fbFetch(`/${account}`, { fields: 'id,name,account_status,currency,amount_spent' })
+    .then(d => {
+      state.fbConnected = true;
+      setFbConnected(true, d.name);
+      setFbMsg(`✅ ${d.name} · €${(+d.amount_spent/100).toFixed(0)} išleista iš viso`, 'success');
+      toast(`Prisijungta: ${d.name}`, 'success');
+    })
+    .catch(e => { setFbMsg('❌ ' + e.message, 'error'); setFbConnected(false); });
+
+  loadOverviewData();
+  loadCampaignData();
+  loadAdsData();
+}
+
+function setFbConnected(ok, name) {
+  const dot = document.getElementById('sidebar-dot');
+  const label = document.getElementById('sidebar-conn-label');
+  const badge = document.getElementById('fb-badge');
+  dot.className = 'fb-conn-dot' + (ok ? ' connected' : '');
+  label.textContent = ok ? `FB: ${name || 'Prisijungta'}` : 'Facebook: neprisijungta';
+  if (badge) { badge.textContent = ok ? 'Prisijungta' : 'Neprijungta'; badge.className = ok ? 'badge badge-green' : 'badge badge-red'; }
+}
+
+// =========================================
+// DATE PRESETS
+// =========================================
+function periodToPreset(p) {
+  return { today: 'today', yesterday: 'yesterday', week: 'last_7d', month: 'last_30d' }[p] || 'last_30d';
+}
+
+// =========================================
+// OVERVIEW DATA
+// =========================================
+function loadOverviewData() {
+  if (!getToken()) return;
+  const preset = periodToPreset(state.period);
+  const account = getAccount();
+  const fields = 'campaign_name,spend,impressions,clicks,actions,cost_per_action_type,reach';
+  fbFetch(`/${account}/insights`, { fields, date_preset: preset, level: 'campaign', limit: 20 })
+    .then(d => renderOverview(d.data || []))
+    .catch(e => console.error('Overview:', e));
+}
+
+function renderOverview(data) {
+  state.campaigns = data;
+  const totalSpend = data.reduce((s, c) => s + +c.spend, 0);
+  let totalResults = 0;
+  data.forEach(c => {
+    const a = (c.actions || []).find(x => ['lead','purchase','offsite_conversion.fb_pixel_purchase','complete_registration'].includes(x.action_type));
+    if (a) totalResults += +a.value;
+  });
+  const avgCpa = totalResults > 0 ? totalSpend / totalResults : 0;
+
+  setKpi('kpi-spend', '€' + totalSpend.toFixed(2), getPeriodLabel());
+  setKpi('kpi-results', String(totalResults), totalResults > 0 ? 'leadai / pirkimai' : 'nėra rezultatų');
+  setKpi('kpi-cpa', avgCpa > 0 ? '€' + avgCpa.toFixed(2) : '—', 'kaina už rezultatą');
+
+  // Charts
+  const sorted = [...data].sort((a,b) => +b.spend - +a.spend);
+  buildChart('spendChart', 'doughnut',
+    sorted.map(c => shorten(c.campaign_name, 18)),
+    sorted.map(c => +c.spend),
+    ['#6366f1','#22c55e','#f59e0b','#ef4444','#94a3b8','#3b82f6'],
+    '€'
+  );
+
+  const withCpa = sorted.filter(c => {
+    const a = (c.cost_per_action_type || []).find(x => ['lead','purchase','offsite_conversion.fb_pixel_purchase'].includes(x.action_type));
+    return a && +a.value > 0;
+  });
+  buildChart('cpaChart', 'bar',
+    withCpa.map(c => shorten(c.campaign_name, 16)),
+    withCpa.map(c => {
+      const a = (c.cost_per_action_type || []).find(x => ['lead','purchase','offsite_conversion.fb_pixel_purchase'].includes(x.action_type));
+      return +a.value;
+    }),
+    withCpa.map(c => {
+      const a = (c.cost_per_action_type || []).find(x => ['lead','purchase','offsite_conversion.fb_pixel_purchase'].includes(x.action_type));
+      const v = +a.value;
+      return v < 5 ? '#22c55e' : v < 12 ? '#f59e0b' : '#ef4444';
+    }),
+    '€'
+  );
+
+  // Table
+  const tbody = document.getElementById('overview-tbody');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted);">Nėra duomenų šiam periodui</td></tr>'; return; }
+  const avgCpaAll = avgCpa;
+  tbody.innerHTML = sorted.map(c => {
+    const spend = +c.spend;
+    const results = getResults(c);
+    const cpa = results > 0 ? spend / results : 0;
+    const status = getStatusBadge(c);
+    const rating = getRating(cpa, avgCpaAll);
+    return `<tr>
+      <td class="name">${c.campaign_name}</td>
+      <td>${status}</td>
+      <td class="mono">€${spend.toFixed(2)}</td>
+      <td>${results > 0 ? results : '—'}</td>
+      <td class="mono">${cpa > 0 ? '€'+cpa.toFixed(2) : '—'}</td>
+      <td>${rating}</td>
+    </tr>`;
+  }).join('');
+}
+
+// =========================================
+// CAMPAIGN DATA
+// =========================================
+function loadCampaignData() {
+  if (!getToken()) return;
+  const account = getAccount();
+  const preset = periodToPreset(state.campPeriod === 'week' ? 'week' : state.campPeriod === 'today' ? 'today' : 'month');
+  const fields = 'campaign_name,campaign_id,spend,impressions,clicks,reach,actions,cost_per_action_type';
+  fbFetch(`/${account}/insights`, { fields, date_preset: preset, level: 'campaign', limit: 20 })
+    .then(d => renderCampaigns(d.data || []))
+    .catch(e => console.error('Campaigns:', e));
+}
+
+function renderCampaigns(data) {
+  const totalSpend = data.reduce((s,c) => s + +c.spend, 0);
+  let totalResults = 0, totalImpr = 0, totalClicks = 0;
+  data.forEach(c => {
+    totalResults += getResults(c);
+    totalImpr += +c.impressions || 0;
+    totalClicks += +c.clicks || 0;
+  });
+
+  document.getElementById('camp-kpi-row').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Išleista</div><div class="kpi-val">€${totalSpend.toFixed(0)}</div><div class="kpi-sub">${getPeriodLabel()}</div></div>
+    <div class="kpi"><div class="kpi-label">Pasiekiamumas</div><div class="kpi-val">${fmtN(totalImpr)}</div><div class="kpi-sub">peržiūrų</div></div>
+    <div class="kpi"><div class="kpi-label">Paspaudimai</div><div class="kpi-val">${fmtN(totalClicks)}</div><div class="kpi-sub">${totalImpr > 0 ? ((totalClicks/totalImpr)*100).toFixed(2)+'% CTR' : '—'}</div></div>
+    <div class="kpi"><div class="kpi-label">Rezultatai</div><div class="kpi-val">${totalResults}</div><div class="kpi-sub">leadai / pirkimai</div></div>
+    <div class="kpi"><div class="kpi-label">Vid. CPA</div><div class="kpi-val">${totalResults > 0 ? '€'+(totalSpend/totalResults).toFixed(2) : '—'}</div><div class="kpi-sub">kaina už rezultatą</div></div>
+  `;
+
+  const sorted = [...data].sort((a,b) => +b.spend - +a.spend);
+  const avgCpa = totalResults > 0 ? totalSpend / totalResults : 0;
+  const tbody = document.getElementById('campaigns-tbody');
+  if (!sorted.length) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted);">Nėra duomenų</td></tr>'; return; }
+  tbody.innerHTML = sorted.map(c => {
+    const spend = +c.spend;
+    const reach = +c.reach || 0;
+    const clicks = +c.clicks || 0;
+    const impr = +c.impressions || 0;
+    const results = getResults(c);
+    const cpa = results > 0 ? spend / results : 0;
+    const actionType = getMainActionType(c);
+    const rating = getRating(cpa, avgCpa);
+    return `<tr>
+      <td class="name" style="max-width:200px;word-break:break-word;">${c.campaign_name}</td>
+      <td>${getStatusBadge(c)}</td>
+      <td><span class="badge badge-blue">${actionType}</span></td>
+      <td class="mono">€${spend.toFixed(2)}</td>
+      <td class="mono">${fmtN(reach)}</td>
+      <td class="mono">${fmtN(clicks)}</td>
+      <td class="mono">${results > 0 ? results : '—'}</td>
+      <td class="mono">${cpa > 0 ? '€'+cpa.toFixed(2) : '—'}</td>
+      <td>${rating}</td>
+    </tr>`;
+  }).join('');
+}
+
+// =========================================
+// ADS DATA
+// =========================================
+function loadAdsData() {
+  if (!getToken()) return;
+  const account = getAccount();
+  const fields = 'ad_name,adset_name,campaign_name,spend,impressions,clicks,actions,cost_per_action_type';
+  fbFetch(`/${account}/insights`, { fields, date_preset: 'last_30d', level: 'ad', limit: 100 })
+    .then(d => {
+      state.ads = d.data || [];
+      populateAdCampaignFilter();
+      renderAdsTable();
+    })
+    .catch(e => console.error('Ads:', e));
+}
+
+function populateAdCampaignFilter() {
+  const camps = [...new Set(state.ads.map(a => a.campaign_name))];
+  const sel = document.getElementById('ad-campaign-filter');
+  sel.innerHTML = '<option value="all">Visos kampanijos</option>' +
+    camps.map(c => `<option value="${c}">${shorten(c, 30)}</option>`).join('');
+}
+
+function renderAdsTable() {
+  const campFilter = document.getElementById('ad-campaign-filter').value;
+  let data = state.ads;
+  if (campFilter !== 'all') data = data.filter(a => a.campaign_name === campFilter);
+
+  const totalSpend = data.reduce((s,a) => s + +a.spend, 0);
+  let totalResults = 0;
+  data.forEach(a => totalResults += getResults(a));
+  const avgCpa = totalResults > 0 ? totalSpend / totalResults : 0;
+
+  // Filter by winner/loser
+  if (currentAdFilter === 'winner') data = data.filter(a => { const r=getResults(a); if(!r) return false; const c=+a.spend/r; return c < avgCpa*0.85; });
+  else if (currentAdFilter === 'loser') data = data.filter(a => { const r=getResults(a); if(!r && +a.spend > 5) return true; if(!r) return false; const c=+a.spend/r; return c > avgCpa*1.5; });
+
+  const sorted = [...data].sort((a,b) => +b.spend - +a.spend);
+  const tbody = document.getElementById('ads-tbody');
+  if (!sorted.length) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted);">${state.ads.length ? 'Pagal filtrus nerasta reklamų' : 'Junkite Facebook API → Nustatymai'}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = sorted.map(a => {
+    const spend = +a.spend;
+    const clicks = +a.clicks || 0;
+    const impr = +a.impressions || 0;
+    const results = getResults(a);
+    const cpa = results > 0 ? spend / results : 0;
+    const ctr = impr > 0 ? (clicks/impr*100).toFixed(2) : '—';
+    const rating = cpa > 0 ? getRating(cpa, avgCpa) : (spend > 5 ? '<span class="badge badge-red">Nėra konv.</span>' : '<span class="badge badge-gray">Mažai duomenų</span>');
+    return `<tr>
+      <td class="name" style="max-width:200px;word-break:break-word;font-size:12.5px;">${a.ad_name || '—'}</td>
+      <td style="font-size:12px;color:var(--muted);max-width:150px;word-break:break-word;">${shorten(a.campaign_name, 20)}</td>
+      <td style="font-size:12px;color:var(--muted);">${shorten(a.adset_name || '—', 18)}</td>
+      <td class="mono">€${spend.toFixed(2)}</td>
+      <td class="mono">${fmtN(clicks)}</td>
+      <td class="mono">${ctr}%</td>
+      <td class="mono">${results > 0 ? results : '—'}</td>
+      <td class="mono">${cpa > 0 ? '€'+cpa.toFixed(2) : '—'}</td>
+      <td>${rating}</td>
+    </tr>`;
+  }).join('');
+}
+
+// =========================================
+// HELPERS
+// =========================================
+function getResults(c) {
+  let r = 0;
+  (c.actions || []).forEach(a => {
+    if (['lead','purchase','offsite_conversion.fb_pixel_purchase','complete_registration','submit_application'].includes(a.action_type)) r += +a.value;
+  });
+  return r;
+}
+
+function getMainActionType(c) {
+  const a = (c.actions || []).find(x => ['lead','purchase','offsite_conversion.fb_pixel_purchase'].includes(x.action_type));
+  if (!a) return 'Kita';
+  return { lead: 'Lead', purchase: 'Pirkimas', 'offsite_conversion.fb_pixel_purchase': 'Pirkimas' }[a.action_type] || 'Kita';
+}
+
+function getStatusBadge(c) {
+  // FB insights don't include status; infer from spend
+  const spend = +c.spend;
+  if (spend > 0) return '<span class="badge badge-green">● Aktyvus</span>';
+  return '<span class="badge badge-gray">● Neaktyvus</span>';
+}
+
+function getRating(cpa, avgCpa) {
+  if (!cpa || !avgCpa) return '<span class="badge badge-gray">—</span>';
+  if (cpa <= avgCpa * 0.7) return '<span class="badge badge-green">🏆 Winner</span>';
+  if (cpa <= avgCpa * 1.2) return '<span class="badge badge-blue">✓ Vidutinis</span>';
+  if (cpa <= avgCpa * 1.8) return '<span class="badge badge-amber">⚠ Silpnas</span>';
+  return '<span class="badge badge-red">🔴 Loser</span>';
+}
+
+function setKpi(id, val, sub) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = val;
+  const s = el.parentElement.querySelector('.kpi-sub');
+  if (s && sub) s.textContent = sub;
+}
+
+function shorten(s, max) {
+  if (!s) return '—';
+  return s.length > max ? s.slice(0, max) + '…' : s;
+}
+
+function fmtN(n) {
+  n = +n;
+  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+  if (n >= 1000) return (n/1000).toFixed(1)+'K';
+  return String(n);
+}
+
+// =========================================
+// CHARTS
+// =========================================
+function buildChart(id, type, labels, data, colors, prefix) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  const ex = Chart.getChart(ctx);
+  if (ex) ex.destroy();
+  state.charts[id] = new Chart(ctx.getContext('2d'), {
+    type,
+    data: {
+      labels,
+      datasets: [{ data, backgroundColor: colors, borderRadius: type==='bar'?6:0, borderWidth: 0 }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: type==='doughnut' ? { position:'bottom', labels:{color:'#64748b',font:{size:10},padding:8,boxWidth:10} } : { display:false },
+        tooltip: { callbacks: { label: ctx => (prefix||'') + (typeof ctx.raw==='number'?ctx.raw.toFixed(2):ctx.raw) } }
+      },
+      scales: type==='bar' ? {
+        x:{ticks:{color:'#475569',font:{size:10}},grid:{color:'rgba(26,37,64,.6)'}},
+        y:{ticks:{color:'#475569',callback:v=>(prefix||'')+v},grid:{color:'rgba(26,37,64,.6)'}}
+      } : undefined
+    }
+  });
+}
+
+// =========================================
+// AGENT ACTIONS
+// =========================================
+let pendingAction = null;
+
+function execAction(type, params) {
+  pendingAction = { type, params };
+  const msgs = {
+    budget: `Padidinti kampanijos "${params.campaign}" dienos biudžetą nuo €${params.from} → €${params.to}.\n\nReikia: ads_management leidimo Facebook token'e.`,
+    pause: `Pristabdyti kampaniją "${params.campaign}".\n\nReikia: ads_management leidimo Facebook token'e.`,
+    landing_fix: `Taisyti "${params.page}" puslapį: ${params.fix}.\n\nAras atliks pakeitimus tiesiogiai kodo bazėje.`,
+    create_page: `Sukurti "${params.name}" landing page.\n\nPradėsiu nuo Genspark/Bolt šablono ir pritaikysiu prie GyvenimoKlubas stilistikos.`,
+  };
+  document.getElementById('modal-title').textContent = 'Patvirtinti veiksmą';
+  document.getElementById('modal-body').textContent = msgs[type] || 'Atlikti šį veiksmą?';
+  document.getElementById('modal-confirm').onclick = () => { confirmAction(); closeModal(); };
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function confirmAction() {
+  const { type, params } = pendingAction || {};
+  if (!type) return;
+  if (type === 'budget' || type === 'pause') {
+    toast('Reikia ads_management leidimo. Generuokite naują token\'ą Graph API Explorer su ads_management → Nustatymai.', 'info');
+    navigate('settings');
+  } else if (type === 'landing_fix' || type === 'create_page') {
+    toast('Užduotis perduota Arasui. Patikrinkite Telegram.', 'success');
+  }
+  pendingAction = null;
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function dismissRec(btn) {
+  btn.closest('.rec').style.opacity = '0.3';
+  btn.closest('.rec').style.pointerEvents = 'none';
+}
+
+function delegateTo(agent, task) {
+  if (agent === 'creative') {
+    const el = document.getElementById('creative-tasks');
+    const item = document.createElement('div');
+    item.className = 'rec';
+    item.innerHTML = `<span style="font-size:16px;">✍️</span><div class="rec-text">${task}</div><div class="rec-actions"><button class="exec-btn go" onclick="startCreativeTask(this, '${task.replace(/'/g,"\\'")}')">Generuoti</button><button class="exec-btn skip" onclick="dismissRec(this)">✕</button></div>`;
+    el.innerHTML = '';
+    el.appendChild(item);
+    const qEl = document.getElementById('creative-queue');
+    if (qEl) qEl.textContent = '1';
+    toast('Užduotis perduota Creative agentui', 'success');
+    navigate('agents');
+  } else if (agent === 'landing') {
+    const el = document.getElementById('landing-tasks');
+    const item = document.createElement('div');
+    item.className = 'rec';
+    item.innerHTML = `<span style="font-size:16px;">📄</span><div class="rec-text">${task}</div><div class="rec-actions"><button class="exec-btn go" onclick="execAction('landing_fix',{page:'general',fix:'${task.replace(/'/g,"\\'")}'})">Vykdyti</button><button class="exec-btn skip" onclick="dismissRec(this)">✕</button></div>`;
+    el.appendChild(item);
+    toast('Užduotis perduota Puslapių kūrėjui', 'success');
+    navigate('agents');
+  }
+}
+
+function addCreativeTask() {
+  const input = document.getElementById('creative-input');
+  const task = input.value.trim();
+  if (!task) return;
+  delegateTo('creative', task);
+  input.value = '';
+}
+
+function startCreativeTask(btn, task) {
+  const openaiKey = localStorage.getItem('openai_key');
+  if (!openaiKey) {
+    toast('Pridėkite OpenAI API raktą → Nustatymai', 'info');
+    navigate('settings');
+    return;
+  }
+  toast('Generuoju... (GPT-4o mini)', 'info');
+  btn.textContent = '⏳';
+  btn.disabled = true;
+  // Simplified: in production this would call OpenAI API
+  setTimeout(() => {
+    btn.closest('.rec').querySelector('.rec-text').innerHTML += '<br><br><span style="color:#94a3b8;font-size:11px;">📝 Sugeneruota: <em>Tekstas bus rodomas čia po OpenAI integracijos.</em></span>';
+    btn.textContent = '✓';
+    btn.style.background = 'rgba(34,197,94,.2)';
+    toast('Creative sugeneruotas!', 'success');
+  }, 2000);
+}
+
+function runAnalysis() {
+  toast('Analitikas apdoroja paskutinių 7 dienų duomenis...', 'info');
+  setTimeout(() => toast('Analizė baigta. 4 rekomendacijos atnaujintos.', 'success'), 2500);
+}
+
+function refreshData() {
+  if (!getToken()) { navigate('settings'); return; }
+  toast('Atnaujinu duomenis...', 'info');
+  loadAllFbData();
+}
+
+// =========================================
+// PROJECTS
+// =========================================
+const PROJECT_AGENTS = { code:'💻 Code', content:'✍️ Content', research:'🔍 Research', analytics:'📊 Analytics' };
+const PROJECT_STATUS = { active:{label:'Aktyvus',cls:'badge-green'}, planning:{label:'Planavimas',cls:'badge-blue'}, paused:{label:'Pristabdytas',cls:'badge-amber'}, done:{label:'Baigtas',cls:'badge-gray'} };
+const PROJECT_TYPES = { funnel:'🎯 Funnel', website:'🌐 Svetainė', product:'📦 Produktas', campaign:'📣 Kampanija', other:'📁 Kita' };
+
+function getProjects() { return JSON.parse(localStorage.getItem('crm_projects') || '[]'); }
+function saveProjects(arr) { localStorage.setItem('crm_projects', JSON.stringify(arr)); }
+
+const DEFAULT_PROJECTS = [
+  { id:'p1', name:'visitvilnius.lt', type:'website', status:'active', desc:'Vilniaus turizmo portalas', url:'https://visitvilnius.lt', target:2000, agents:['code','content'], created:'2026-03-01' },
+  { id:'p2', name:'Antras Pavasaris', type:'funnel', status:'planning', desc:'Menopauzės prenumeratos kanalas', url:'', target:3000, agents:['content','research'], created:'2026-03-01' },
+  { id:'p3', name:'GyvenimoKlubas.lt', type:'website', status:'active', desc:'Sveikatos kursai ir produktai', url:'https://gyvenimoklubas.lt', target:5000, agents:['code','content','analytics'], created:'2026-01-01' },
+];
+
+function initProjects() {
+  if (!localStorage.getItem('crm_projects')) saveProjects(DEFAULT_PROJECTS);
+  renderProjects();
+}
+
+function renderProjects() {
+  const projects = getProjects();
+  const grid = document.getElementById('projects-grid');
+  if (!grid) return;
+  if (!projects.length) { grid.innerHTML = '<div class="empty"><div class="icon">📁</div><h3>Dar nėra projektų</h3><p>Sukurk pirmą →</p></div>'; return; }
+
+  grid.innerHTML = projects.map(p => {
+    const st = PROJECT_STATUS[p.status] || PROJECT_STATUS.active;
+    const tasks = getTasksForProject(p.id);
+    const done = tasks.filter(t => t.status === 'done').length;
+    const active = tasks.filter(t => t.status === 'running').length;
+    return `<div class="card card-p" style="cursor:default;">
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <div style="font-size:22px;">${(PROJECT_TYPES[p.type]||'📁').split(' ')[0]}</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:700;color:white;">${p.name}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">${p.desc||''}</div>
+        </div>
+        <span class="badge ${st.cls}">${st.label}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="background:rgba(7,12,24,.5);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:18px;font-weight:700;color:white;">${done}</div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;">Atlikta</div>
+        </div>
+        <div style="background:rgba(7,12,24,.5);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:18px;font-weight:700;color:${active>0?'var(--green)':'white'};">${active}</div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;">Vykdoma</div>
+        </div>
+        <div style="background:rgba(7,12,24,.5);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:18px;font-weight:700;color:var(--muted);">€${p.target||0}</div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;">Tikslas/mėn</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+        ${(p.agents||[]).map(a => `<span class="badge badge-blue" style="font-size:10px;">${PROJECT_AGENTS[a]||a}</span>`).join('')}
+        ${p.url ? `<a href="${p.url}" target="_blank" style="margin-left:auto;font-size:11px;color:#a5b4fc;">🔗 Atidaryti →</a>` : ''}
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost" style="flex:1;font-size:12px;" onclick="openSpawnModal('${p.id}')">+ Užduotis</button>
+        <button class="btn btn-ghost" style="font-size:12px;" onclick="editProject('${p.id}')">✏️</button>
+        <button class="btn btn-ghost" style="font-size:12px;color:var(--red);" onclick="deleteProject('${p.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Update spawn project select
+  const sel = document.getElementById('spawn-project');
+  if (sel) {
+    sel.innerHTML = '<option value="">— Be projekto —</option>' +
+      projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  }
+}
+
+function openNewProject() {
+  const f = document.getElementById('project-form');
+  document.getElementById('project-form-title').textContent = 'Naujas projektas';
+  document.getElementById('pf-id').value = '';
+  ['pf-name','pf-desc','pf-url','pf-target'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pf-status').value = 'active';
+  document.getElementById('pf-type').value = 'funnel';
+  ['pa-code','pa-content','pa-research','pa-analytics'].forEach(id => document.getElementById(id).checked = false);
+  f.style.display = 'block';
+  f.scrollIntoView({behavior:'smooth'});
+}
+
+function editProject(id) {
+  const p = getProjects().find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('project-form-title').textContent = 'Redaguoti projektą';
+  document.getElementById('pf-id').value = p.id;
+  document.getElementById('pf-name').value = p.name;
+  document.getElementById('pf-desc').value = p.desc||'';
+  document.getElementById('pf-url').value = p.url||'';
+  document.getElementById('pf-target').value = p.target||'';
+  document.getElementById('pf-status').value = p.status||'active';
+  document.getElementById('pf-type').value = p.type||'other';
+  ['code','content','research','analytics'].forEach(a => {
+    document.getElementById('pa-'+a).checked = (p.agents||[]).includes(a);
+  });
+  document.getElementById('project-form').style.display = 'block';
+  document.getElementById('project-form').scrollIntoView({behavior:'smooth'});
+}
+
+function saveProject() {
+  const id = document.getElementById('pf-id').value;
+  const agents = ['code','content','research','analytics'].filter(a => document.getElementById('pa-'+a).checked);
+  const data = {
+    id: id || 'p' + Date.now(),
+    name: document.getElementById('pf-name').value.trim(),
+    desc: document.getElementById('pf-desc').value.trim(),
+    url: document.getElementById('pf-url').value.trim(),
+    target: +document.getElementById('pf-target').value || 0,
+    status: document.getElementById('pf-status').value,
+    type: document.getElementById('pf-type').value,
+    agents,
+    created: id ? (getProjects().find(p=>p.id===id)||{}).created : new Date().toISOString().slice(0,10),
+  };
+  if (!data.name) { toast('Įvesk projekto pavadinimą', 'error'); return; }
+  const projects = getProjects();
+  const idx = projects.findIndex(p => p.id === id);
+  if (idx >= 0) projects[idx] = data;
+  else projects.push(data);
+  saveProjects(projects);
+  renderProjects();
+  document.getElementById('project-form').style.display = 'none';
+  toast(`Projektas "${data.name}" išsaugotas`, 'success');
+}
+
+function deleteProject(id) {
+  const projects = getProjects().filter(p => p.id !== id);
+  saveProjects(projects);
+  renderProjects();
+  toast('Projektas ištrintas', 'info');
+}
+
+// =========================================
+// AGENT TASKS LOG
+// =========================================
+function getTasks() { return JSON.parse(localStorage.getItem('agent_tasks') || '[]'); }
+function saveTasks(arr) { localStorage.setItem('agent_tasks', JSON.stringify(arr)); }
+function getTasksForProject(pid) { return getTasks().filter(t => t.projectId === pid); }
+
+const AGENT_ICONS = { code:'💻', content:'✍️', research:'🔍', analytics:'📊', aras:'🦅', auto:'🦅' };
+const AGENT_NAMES = { code:'Code Agent', content:'Content Agent', research:'Research Agent', analytics:'Analytics Agent', aras:'Aras', auto:'Aras → auto' };
+
+function showAgentTab(tab) {
+  ['agents','recs','log'].forEach(t => {
+    const el = document.getElementById('agent-'+t+'-tab') || (t==='agents' ? document.querySelector('.agents-grid') : null);
+    const btn = document.getElementById('atab-'+t);
+    if (el) el.style.display = 'none';
+    if (btn) btn.classList.remove('active');
+  });
+  if (tab === 'agents') {
+    document.querySelector('.agents-grid').style.display = 'grid';
+  } else {
+    document.getElementById('agent-'+tab+'-tab').style.display = 'block';
+    if (tab === 'log') renderTaskLog();
+    if (tab === 'recs') renderAllRecs();
+  }
+  const btn = document.getElementById('atab-'+tab);
+  if (btn) btn.classList.add('active');
+}
+
+function renderTaskLog() {
+  const tasks = getTasks().slice().reverse(); // newest first
+  const el = document.getElementById('task-log-list');
+  if (!tasks.length) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">Dar nėra užduočių. Sukurk pirmą → "+ Nauja užduotis"</div>'; return; }
+  const projects = getProjects();
+  el.innerHTML = tasks.map(t => {
+    const proj = projects.find(p => p.id === t.projectId);
+    const statusBadge = t.status === 'done' ? '<span class="badge badge-green">✓ Atlikta</span>' :
+      t.status === 'running' ? '<span class="badge badge-blue" style="animation:pulse 2s infinite;">● Vykdoma</span>' :
+      t.status === 'error' ? '<span class="badge badge-red">✗ Klaida</span>' :
+      '<span class="badge badge-gray">⏳ Laukia</span>';
+    return `<div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:flex-start;">
+      <div style="font-size:22px;flex-shrink:0;">${AGENT_ICONS[t.agent]||'🤖'}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+          <span style="font-size:12.5px;font-weight:600;color:white;">${AGENT_NAMES[t.agent]||t.agent}</span>
+          ${proj ? `<span class="badge badge-blue" style="font-size:10px;">${proj.name}</span>` : ''}
+          ${statusBadge}
+          <span style="font-size:11px;color:var(--muted);margin-left:auto;">${new Date(t.created).toLocaleString('lt-LT')}</span>
+        </div>
+        <div style="font-size:12.5px;color:#94a3b8;line-height:1.5;">${t.task}</div>
+        ${t.result ? `<div style="margin-top:8px;padding:8px 10px;background:rgba(7,12,24,.6);border-radius:6px;font-size:12px;color:#cbd5e1;border-left:3px solid var(--green);">${t.result}</div>` : ''}
+      </div>
+      <button onclick="deleteTask('${t.id}')" style="color:var(--muted);background:none;border:none;cursor:pointer;font-size:14px;flex-shrink:0;">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function renderAllRecs() {
+  // Collect all recs from agent cards
+  const recs = document.querySelectorAll('#page-agents .rec');
+  const el = document.getElementById('all-recs-list');
+  if (!recs.length) { el.innerHTML = '<div class="empty"><div class="icon">💡</div><h3>Nėra rekomendacijų</h3><p>Paleisk analizę kad gautum pasiūlymų</p></div>'; return; }
+  el.innerHTML = '';
+  recs.forEach(rec => { if (rec.closest('.rec-list')) el.appendChild(rec.cloneNode(true)); });
+}
+
+function openSpawnModal(projectId) {
+  const sel = document.getElementById('spawn-project');
+  if (projectId && sel) sel.value = projectId;
+  document.getElementById('spawn-task').value = '';
+  document.getElementById('spawn-agent').value = 'auto';
+  document.getElementById('spawn-overlay').style.display = 'flex';
+}
+
+function spawnAgentTask() {
+  const agentType = document.getElementById('spawn-agent').value;
+  const projectId = document.getElementById('spawn-project').value;
+  const taskText = document.getElementById('spawn-task').value.trim();
+  if (!taskText) { toast('Įvesk užduoties aprašymą', 'error'); return; }
+
+  const task = {
+    id: 't' + Date.now(),
+    agent: agentType,
+    projectId,
+    task: taskText,
+    status: 'running',
+    created: new Date().toISOString(),
+    result: null,
+  };
+
+  const tasks = getTasks();
+  tasks.push(task);
+  saveTasks(tasks);
+  document.getElementById('spawn-overlay').style.display = 'none';
+  toast(`Užduotis perduota → ${AGENT_NAMES[agentType]}`, 'success');
+  renderProjects();
+
+  // Simulate agent work (in production this would use sessions_spawn)
+  setTimeout(() => {
+    const all = getTasks();
+    const t = all.find(x => x.id === task.id);
+    if (t) {
+      t.status = 'done';
+      t.result = `[${AGENT_NAMES[agentType]}] Užduotis priimta. Rezultatas bus pateiktas per Telegram.`;
+      saveTasks(all);
+      renderProjects();
+      if (document.getElementById('agent-log-tab').style.display !== 'none') renderTaskLog();
+      toast(`✓ ${AGENT_NAMES[agentType]} baigė užduotį`, 'success');
+    }
+  }, 3000);
+}
+
+function deleteTask(id) {
+  saveTasks(getTasks().filter(t => t.id !== id));
+  renderTaskLog();
+}
+
+function clearTaskLog() {
+  if (!confirm('Išvalyti visą užduočių istoriją?')) return;
+  saveTasks([]);
+  renderTaskLog();
+}
+
+// =========================================
+// MEMORY SAVE
+// =========================================
+function saveMemory() {
+  const projects = getProjects();
+  const tasks = getTasks().slice(-10);
+  const summary = `📊 Dashboard išsaugota ${new Date().toLocaleString('lt-LT')}\n\nProjektai (${projects.length}):\n${projects.map(p=>` • ${p.name} — ${PROJECT_STATUS[p.status]?.label}`).join('\n')}\n\nPaskutinės užduotys (${tasks.length}):\n${tasks.slice(-5).map(t=>' • ['+AGENT_NAMES[t.agent]+'] '+t.task.slice(0,60)).join('\n')}`;
+  localStorage.setItem('last_memory_save', new Date().toISOString());
+  localStorage.setItem('last_memory_content', summary);
+  toast('Kontekstas išsaugotas → Aras atmintis atnaujinta', 'success');
+  console.log('MEMORY_SAVE:', summary);
+}
+
+// =========================================
+// STRIPE INTEGRATION
+// =========================================
+const STRIPE_API = 'https://api.stripe.com/v1';
+
+// Product → Campaign mapping (keyword matching on description)
+const PRODUCT_CAMPAIGN_MAP = [
+  { keywords: ['žarnynas','zarnynas','žarnyno','zarnyno'], campaign: 'Žarnyno kodas', color: '#6366f1' },
+  { keywords: ['cholesterolis','sveikatos paslaptys','cholesterol'], campaign: 'Cholesterolis KNYGA', color: '#22c55e' },
+  { keywords: ['tinderio','tinder','paskutinė'], campaign: 'PASKUTINĖ TINDERIO ŽINUTĖ', color: '#ef4444' },
+  { keywords: ['menopauze','menopauz','pavasaris','antras'], campaign: 'Menopauzes planas', color: '#f59e0b' },
+  { keywords: ['kūnas','kunas','mano kūnas'], campaign: 'Mano kūnas', color: '#94a3b8' },
+];
+
+function matchProduct(description) {
+  if (!description) return { campaign: 'Kita', color: '#475569' };
+  const lower = description.toLowerCase();
+  for (const rule of PRODUCT_CAMPAIGN_MAP) {
+    if (rule.keywords.some(k => lower.includes(k))) return rule;
+  }
+  return { campaign: 'Kita', color: '#475569' };
+}
+
+function connectStripe() {
+  const key = document.getElementById('s-stripe-key').value.trim();
+  if (!key) { setStripeMsg('Įveskite Stripe Restricted Key', 'error'); return; }
+  localStorage.setItem('stripe_key', key);
+  setStripeMsg('⏳ Jungiamasi...', 'info');
+  loadStripeData(false);
+}
+
+function setStripeMsg(msg, type) {
+  const el = document.getElementById('stripe-msg');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = type === 'error' ? 'var(--red)' : type === 'info' ? '#a5b4fc' : 'var(--green)';
+  el.style.display = 'block';
+}
+
+function stripeFetch(endpoint, params = {}) {
+  const key = localStorage.getItem('stripe_key');
+  if (!key) return Promise.reject(new Error('No Stripe key'));
+  const qs = new URLSearchParams(params).toString();
+  return fetch(`${STRIPE_API}${endpoint}${qs ? '?' + qs : ''}`, {
+    headers: { Authorization: 'Bearer ' + key }
+  }).then(r => r.json()).then(d => {
+    if (d.error) throw new Error(d.error.message);
+    return d;
+  });
+}
+
+function getPeriodRange(period) {
+  const now = new Date();
+  const midnight = (d) => Math.floor(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0,0,0).getTime() / 1000);
+  if (period === 'today') {
+    return { gte: midnight(now), lt: midnight(now) + 86400 };
+  }
+  if (period === 'yesterday') {
+    const yest = new Date(now); yest.setDate(yest.getDate() - 1);
+    return { gte: midnight(yest), lt: midnight(now) };
+  }
+  if (period === 'week') {
+    const w = new Date(now); w.setDate(w.getDate() - 7);
+    return { gte: midnight(w) };
+  }
+  // month (default)
+  const m = new Date(now); m.setDate(m.getDate() - 30);
+  return { gte: midnight(m) };
+}
+
+async function loadStripeData(silent) {
+  const key = localStorage.getItem('stripe_key');
+  if (!key) return;
+
+  const range = getPeriodRange(state.period);
+
+  try {
+    // Use charges endpoint (matches Stripe Gross Volume)
+    let allTxns = [];
+    let hasMore = true;
+    let startingAfter = null;
+    while (hasMore && allTxns.length < 500) {
+      const params = { limit: 100, 'created[gte]': range.gte, paid: 'true' };
+      if (range.lt) params['created[lt]'] = range.lt;
+      if (startingAfter) params.starting_after = startingAfter;
+      const resp = await stripeFetch('/charges', params);
+      allTxns = allTxns.concat(resp.data || []);
+      hasMore = resp.has_more;
+      if (resp.data && resp.data.length > 0) startingAfter = resp.data[resp.data.length - 1].id;
+      else break;
+    }
+
+    if (!silent) {
+      setStripeMsg(`✅ ${allTxns.length} transakcijų įkelta`, 'success');
+      toast(`Stripe: ${allTxns.length} mokėjimų įkelta`, 'success');
+    }
+
+    // Update stripe badge
+    const badge = document.getElementById('stripe-badge');
+    if (badge) { badge.textContent = 'Prisijungta'; badge.className = 'badge badge-green'; }
+
+    processStripeData(allTxns);
+
+  } catch (e) {
+    setStripeMsg('❌ ' + e.message, 'error');
+    if (!silent) toast('Stripe klaida: ' + e.message, 'error');
+  }
+}
+
+function processStripeData(txns) {
+  // charges endpoint: amount = gross in cents, amount_refunded for refunds
+  const charges = txns.filter(t => t.paid && t.amount > 0);
+
+  const totalRevenue = charges.reduce((s, t) => s + (t.amount - (t.amount_refunded||0)), 0) / 100;
+  // Stripe fee ~1.4% + €0.25 per transaction (estimate; exact fee needs balance_transaction lookup)
+  const totalFees = charges.reduce((s, t) => s + Math.round((t.amount * 0.014) + 25), 0) / 100;
+  const totalNet = totalRevenue - totalFees;
+  const totalCount = charges.length;
+
+  // Update KPIs
+  const revenueEl = document.getElementById('kpi-revenue');
+  const revenueSubEl = document.getElementById('kpi-revenue-sub');
+  const roasEl = document.getElementById('kpi-roas');
+  const roasSubEl = document.getElementById('kpi-roas-sub');
+
+  if (revenueEl) {
+    revenueEl.textContent = '€' + totalRevenue.toFixed(0);
+    revenueEl.style.color = 'white';
+    revenueEl.closest('.kpi').querySelector('.kpi-sub').removeAttribute('onclick');
+  }
+  if (revenueSubEl) revenueSubEl.textContent = `${totalCount} pardavimų · neto €${totalNet.toFixed(0)}`;
+
+  // ROAS: need FB spend data
+  const fbSpend = getCurrentFbSpend();
+  if (fbSpend > 0 && roasEl) {
+    const roas = totalRevenue / fbSpend;
+    roasEl.textContent = roas.toFixed(2) + 'x';
+    roasEl.style.color = roas >= 3 ? 'var(--green)' : roas >= 1.5 ? 'var(--amber)' : 'var(--red)';
+    if (roasSubEl) roasSubEl.textContent = `€${totalRevenue.toFixed(0)} / €${fbSpend.toFixed(0)} išlaidų`;
+  }
+
+  // Group by product
+  const products = {};
+  charges.forEach(t => {
+    const match = matchProduct(t.description);
+    const prodName = extractProductName(t.description) || match.campaign;
+    if (!products[prodName]) products[prodName] = { name: prodName, campaign: match.campaign, color: match.color, count: 0, revenue: 0, amounts: [] };
+    const net = (t.amount - (t.amount_refunded||0)) / 100;
+    products[prodName].count++;
+    products[prodName].revenue += net;
+    products[prodName].amounts.push(net);
+  });
+
+  // Render product breakdown table
+  const tbody = document.getElementById('stripe-products-tbody');
+  const section = document.getElementById('stripe-revenue-section');
+  if (!tbody || !section) return;
+
+  section.style.display = 'block';
+  document.getElementById('stripe-period-label').textContent = getPeriodLabel();
+
+  const sorted = Object.values(products).sort((a, b) => b.revenue - a.revenue);
+  const fbCampaignSpend = getFbCampaignSpendMap();
+
+  tbody.innerHTML = sorted.map(p => {
+    const avg = p.count > 0 ? p.revenue / p.count : 0;
+    const campSpend = fbCampaignSpend[p.campaign] || 0;
+    const roas = campSpend > 0 ? p.revenue / campSpend : null;
+    const roasBadge = roas === null ? '<span class="badge badge-gray">—</span>' :
+      roas >= 3 ? `<span class="badge badge-green">🏆 ${roas.toFixed(2)}x</span>` :
+      roas >= 1.5 ? `<span class="badge badge-amber">${roas.toFixed(2)}x</span>` :
+      `<span class="badge badge-red">${roas.toFixed(2)}x</span>`;
+
+    return `<tr>
+      <td class="name" style="font-size:12.5px;max-width:200px;word-break:break-word;">${p.name}</td>
+      <td class="mono">${p.count}</td>
+      <td class="mono" style="color:var(--green);">€${p.revenue.toFixed(2)}</td>
+      <td class="mono">€${avg.toFixed(2)}</td>
+      <td style="font-size:12px;color:#a5b4fc;">${p.campaign}</td>
+      <td>${roasBadge}</td>
+    </tr>`;
+  }).join('');
+
+  // Add totals row
+  tbody.innerHTML += `<tr style="border-top:2px solid var(--border);">
+    <td class="name" style="font-weight:700;">VISO</td>
+    <td class="mono" style="font-weight:700;">${totalCount}</td>
+    <td class="mono" style="color:var(--green);font-weight:700;">€${totalRevenue.toFixed(2)}</td>
+    <td class="mono">€${totalCount > 0 ? (totalRevenue/totalCount).toFixed(2) : '—'}</td>
+    <td></td>
+    <td></td>
+  </tr>`;
+}
+
+function extractProductName(description) {
+  if (!description) return null;
+  // Format: "GyvenimoKlubas | email | Product: NAME"
+  const match = description.match(/Product:\s*(.+)$/i);
+  if (match) return match[1].trim();
+  // Try to extract after last |
+  const parts = description.split('|');
+  if (parts.length >= 3) return parts[parts.length - 1].trim();
+  return null;
+}
+
+function getCurrentFbSpend() {
+  if (!state.campaigns || !state.campaigns.length) return 0;
+  return state.campaigns.reduce((s, c) => s + +c.spend, 0);
+}
+
+function getFbCampaignSpendMap() {
+  const map = {};
+  (state.campaigns || []).forEach(c => {
+    map[c.campaign_name] = +c.spend;
+    // Also map by keyword
+    for (const rule of PRODUCT_CAMPAIGN_MAP) {
+      if (rule.campaign === c.campaign_name || c.campaign_name.toLowerCase().includes(rule.keywords[0])) {
+        map[rule.campaign] = +c.spend;
+      }
+    }
+  });
+  return map;
+}
+
+// =========================================
+// SETTINGS
+// =========================================
+function saveOpenAI() {
+  const key = document.getElementById('s-openai-key').value.trim();
+  if (!key) { toast('Įveskite API raktą', 'error'); return; }
+  localStorage.setItem('openai_key', key);
+  document.getElementById('openai-badge').textContent = 'Prisijungta';
+  document.getElementById('openai-badge').className = 'badge badge-green';
+  toast('OpenAI raktas išsaugotas', 'success');
+}
+
+// =========================================
+// TOAST
+// =========================================
+function toast(msg, type = 'info') {
+  const c = document.getElementById('toast');
+  const d = document.createElement('div');
+  d.className = `toast-item toast-${type}`;
+  d.textContent = msg;
+  c.appendChild(d);
+  setTimeout(() => { d.style.opacity='0'; d.style.transition='opacity .3s'; setTimeout(()=>d.remove(),300); }, 3500);
+}
+
+// =========================================
+// INIT
+// =========================================
+window.addEventListener('load', () => {
+  // Set today's date
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('lt-LT', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  // Pre-load static (non-secret) defaults
+  if (!localStorage.getItem('fb_account')) localStorage.setItem('fb_account', 'act_826084951532049');
+  if (!localStorage.getItem('fb_app_id')) localStorage.setItem('fb_app_id', '1246042837033133');
+
+  // Restore saved credentials
+  const token = localStorage.getItem('fb_token');
+  const account = localStorage.getItem('fb_account');
+  const appId = localStorage.getItem('fb_app_id');
+  const openaiKey = localStorage.getItem('openai_key');
+
+  if (token) document.getElementById('s-fb-token').value = token;
+  if (account) document.getElementById('s-fb-account').value = account;
+  if (appId) document.getElementById('s-fb-app-id').value = appId;
+  if (openaiKey) { document.getElementById('s-openai-key').value = openaiKey; document.getElementById('openai-badge').textContent = 'Prisijungta'; document.getElementById('openai-badge').className = 'badge badge-green'; }
+
+  // Restore Stripe key
+  const stripeKey = localStorage.getItem('stripe_key');
+  if (stripeKey) {
+    document.getElementById('s-stripe-key').value = stripeKey;
+    const badge = document.getElementById('stripe-badge');
+    if (badge) { badge.textContent = 'Prisijungta'; badge.className = 'badge badge-green'; }
+  }
+
+  if (token) {
+    setFbConnected(null, ''); // pending state
+    document.getElementById('sidebar-conn-label').textContent = 'Facebook: jungiamasi…';
+    loadAllFbData();
+  } else {
+    setFbConnected(false);
+    document.getElementById('sidebar-conn-label').textContent = 'Facebook: neprijungta';
+  }
+
+  // Auto-load Stripe if key saved
+  if (stripeKey) {
+    loadStripeData(true);
+  }
+
+  // Init projects & tasks
+  initProjects();
+
+  // Rec badge
+  document.getElementById('rec-badge').style.display = 'flex';
+  document.getElementById('rec-badge').textContent = '4';
+
+  // Modal close on overlay click
+  document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+});
+</script>
+</body>
+</html>

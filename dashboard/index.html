@@ -203,10 +203,14 @@ nav { flex: 1; padding: 12px 10px; }
     <div class="nav-item" onclick="navigate('ads')">
       <span class="icon">🎨</span> Reklamos
     </div>
-    <div class="nav-section">Sistema</div>
+    <div class="nav-section">Valdymas</div>
+    <div class="nav-item" onclick="navigate('projects')">
+      <span class="icon">📁</span> Projektai
+      <span class="nav-badge" id="projects-badge" style="display:none">0</span>
+    </div>
     <div class="nav-item" onclick="navigate('agents')">
       <span class="icon">🤖</span> Agentai
-      <span class="nav-badge" id="rec-badge" style="display:none">0</span>
+      <span class="nav-badge" id="rec-badge" style="display:none">4</span>
     </div>
     <div class="nav-section">Konfigūracija</div>
     <div class="nav-item" onclick="navigate('settings')">
@@ -233,6 +237,7 @@ nav { flex: 1; padding: 12px 10px; }
     </div>
     <div class="topbar-actions">
       <div id="last-update" style="font-size:11px;color:var(--muted);"></div>
+      <button class="btn btn-ghost" onclick="saveMemory()" title="Išsaugoti kontekstą į atmintį">💾 Atmintis</button>
       <button class="btn btn-ghost" onclick="refreshData()">🔄 Atnaujinti</button>
     </div>
   </div>
@@ -352,6 +357,77 @@ nav { flex: 1; padding: 12px 10px; }
 
   </div>
 
+  <!-- ======== PAGE: PROJECTS ======== -->
+  <div id="page-projects" class="page">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:white;">Projektai</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Visi aktyvūs ir planuojami projektai</div>
+      </div>
+      <button class="btn btn-primary" style="margin-left:auto;" onclick="openNewProject()">+ Naujas projektas</button>
+    </div>
+
+    <div id="projects-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;">
+      <!-- filled by JS -->
+    </div>
+
+    <!-- New/Edit project modal form -->
+    <div id="project-form" style="display:none;margin-top:20px;" class="card card-p">
+      <div style="font-size:14px;font-weight:600;color:white;margin-bottom:16px;" id="project-form-title">Naujas projektas</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label class="form-label">Pavadinimas</label>
+          <input id="pf-name" class="form-input" placeholder="pvz. Antras Pavasaris">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Statusas</label>
+          <select id="pf-status" class="form-input">
+            <option value="active">Aktyvus</option>
+            <option value="planning">Planavimas</option>
+            <option value="paused">Pristabdytas</option>
+            <option value="done">Baigtas</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipas</label>
+          <select id="pf-type" class="form-input">
+            <option value="funnel">Sales funnel</option>
+            <option value="website">Svetainė</option>
+            <option value="product">Produktas</option>
+            <option value="campaign">Kampanija</option>
+            <option value="other">Kita</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pajamų tikslas (€/mėn)</label>
+          <input id="pf-target" class="form-input" placeholder="1000" type="number">
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">Aprašymas</label>
+          <input id="pf-desc" class="form-input" placeholder="Trumpas projekto aprašymas...">
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">URL</label>
+          <input id="pf-url" class="form-input" placeholder="https://...">
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">Agentų komanda</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer;"><input type="checkbox" id="pa-code" value="code"> 💻 Code</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer;"><input type="checkbox" id="pa-content" value="content"> ✍️ Content</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer;"><input type="checkbox" id="pa-research" value="research"> 🔍 Research</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer;"><input type="checkbox" id="pa-analytics" value="analytics"> 📊 Analytics</label>
+          </div>
+        </div>
+      </div>
+      <input type="hidden" id="pf-id">
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-primary" onclick="saveProject()">Išsaugoti</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('project-form').style.display='none'">Atšaukti</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ======== PAGE: CAMPAIGNS ======== -->
   <div id="page-campaigns" class="page">
 
@@ -436,12 +512,23 @@ nav { flex: 1; padding: 12px 10px; }
   <!-- ======== PAGE: AGENTS ======== -->
   <div id="page-agents" class="page">
 
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
       <div>
-        <div style="font-size:14px;font-weight:600;color:white;">Agentų sistema</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Kiekvienas agentas specializuojasi savo srityje ir gali vykdyti veiksmus</div>
+        <div style="font-size:14px;font-weight:600;color:white;">Agentų komanda</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Užduočių delegavimas, istorija ir rekomendacijos</div>
       </div>
-      <button class="btn btn-primary" style="margin-left:auto;" onclick="runAnalysis()">▶ Paleisti analizę</button>
+      <div style="margin-left:auto;display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="showAgentTab('recs')">💡 Rekomendacijos</button>
+        <button class="btn btn-ghost" onclick="showAgentTab('log')">📋 Užduočių log</button>
+        <button class="btn btn-primary" onclick="openSpawnModal()">+ Nauja užduotis</button>
+      </div>
+    </div>
+
+    <!-- Agent sub-tabs -->
+    <div style="display:flex;gap:4px;margin-bottom:20px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:3px;display:inline-flex;">
+      <div class="period-tab active" id="atab-agents" onclick="showAgentTab('agents')">🤖 Agentai</div>
+      <div class="period-tab" id="atab-recs" onclick="showAgentTab('recs')">💡 Rekomendacijos</div>
+      <div class="period-tab" id="atab-log" onclick="showAgentTab('log')">📋 Užduočių log</div>
     </div>
 
     <div class="agents-grid">
@@ -637,6 +724,58 @@ nav { flex: 1; padding: 12px 10px; }
       </div>
 
     </div>
+
+    <!-- RECOMMENDATIONS tab -->
+    <div id="agent-recs-tab" style="display:none;">
+      <div id="all-recs-list" style="display:flex;flex-direction:column;gap:10px;max-width:800px;">
+        <!-- filled by JS from all agent recs -->
+      </div>
+    </div>
+
+    <!-- TASK LOG tab -->
+    <div id="agent-log-tab" style="display:none;">
+      <div class="card">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:13px;font-weight:600;color:white;">Užduočių istorija</span>
+          <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;" onclick="clearTaskLog()">Išvalyti</button>
+        </div>
+        <div id="task-log-list" style="max-height:500px;overflow-y:auto;">
+          <div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">Dar nėra užduočių. Sukurk pirmą →</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SPAWN AGENT MODAL -->
+  <div id="spawn-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+    <div style="background:var(--card);border:1px solid var(--border-hover);border-radius:16px;padding:28px;max-width:500px;width:90%;">
+      <div style="font-size:16px;font-weight:700;color:white;margin-bottom:16px;">⚡ Nauja agentų užduotis</div>
+      <div class="form-group">
+        <label class="form-label">Agentas</label>
+        <select id="spawn-agent" class="form-input">
+          <option value="auto">🧠 Aras sprendžia (rekomenduojama)</option>
+          <option value="code">💻 Code Agent (GPT-4o mini)</option>
+          <option value="content">✍️ Content Agent (GPT-4o mini)</option>
+          <option value="research">🔍 Research Agent (GPT-4o mini)</option>
+          <option value="analytics">📊 Analytics Agent (GPT-4o mini)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Projektas</label>
+        <select id="spawn-project" class="form-input">
+          <option value="">— Be projekto —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Užduotis</label>
+        <textarea id="spawn-task" class="form-input" rows="4" placeholder="Aprašyk ką reikia padaryti..." style="resize:vertical;"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-primary" onclick="spawnAgentTask()" style="flex:1;">▶ Deleguoti</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('spawn-overlay').style.display='none'">Atšaukti</button>
+      </div>
+    </div>
   </div>
 
   <!-- ======== PAGE: SETTINGS ======== -->
@@ -778,7 +917,8 @@ const PAGE_TITLES = {
   overview: ['Apžvalga', 'Facebook Ads · {period}'],
   campaigns: ['Kampanijos', 'Statusai ir rezultatai'],
   ads: ['Reklamos', 'Ad lygio analizė'],
-  agents: ['Agentai', 'Rekomendacijos ir veiksmai'],
+  projects: ['Projektai', 'Aktyvūs ir planuojami projektai'],
+  agents: ['Agentai', 'Komanda, užduotys ir rekomendacijos'],
   settings: ['Nustatymai', 'API jungtys ir konfigūracija'],
 };
 
@@ -1282,6 +1422,278 @@ function refreshData() {
 }
 
 // =========================================
+// PROJECTS
+// =========================================
+const PROJECT_AGENTS = { code:'💻 Code', content:'✍️ Content', research:'🔍 Research', analytics:'📊 Analytics' };
+const PROJECT_STATUS = { active:{label:'Aktyvus',cls:'badge-green'}, planning:{label:'Planavimas',cls:'badge-blue'}, paused:{label:'Pristabdytas',cls:'badge-amber'}, done:{label:'Baigtas',cls:'badge-gray'} };
+const PROJECT_TYPES = { funnel:'🎯 Funnel', website:'🌐 Svetainė', product:'📦 Produktas', campaign:'📣 Kampanija', other:'📁 Kita' };
+
+function getProjects() { return JSON.parse(localStorage.getItem('crm_projects') || '[]'); }
+function saveProjects(arr) { localStorage.setItem('crm_projects', JSON.stringify(arr)); }
+
+const DEFAULT_PROJECTS = [
+  { id:'p1', name:'visitvilnius.lt', type:'website', status:'active', desc:'Vilniaus turizmo portalas', url:'https://visitvilnius.lt', target:2000, agents:['code','content'], created:'2026-03-01' },
+  { id:'p2', name:'Antras Pavasaris', type:'funnel', status:'planning', desc:'Menopauzės prenumeratos kanalas', url:'', target:3000, agents:['content','research'], created:'2026-03-01' },
+  { id:'p3', name:'GyvenimoKlubas.lt', type:'website', status:'active', desc:'Sveikatos kursai ir produktai', url:'https://gyvenimoklubas.lt', target:5000, agents:['code','content','analytics'], created:'2026-01-01' },
+];
+
+function initProjects() {
+  if (!localStorage.getItem('crm_projects')) saveProjects(DEFAULT_PROJECTS);
+  renderProjects();
+}
+
+function renderProjects() {
+  const projects = getProjects();
+  const grid = document.getElementById('projects-grid');
+  if (!grid) return;
+  if (!projects.length) { grid.innerHTML = '<div class="empty"><div class="icon">📁</div><h3>Dar nėra projektų</h3><p>Sukurk pirmą →</p></div>'; return; }
+
+  grid.innerHTML = projects.map(p => {
+    const st = PROJECT_STATUS[p.status] || PROJECT_STATUS.active;
+    const tasks = getTasksForProject(p.id);
+    const done = tasks.filter(t => t.status === 'done').length;
+    const active = tasks.filter(t => t.status === 'running').length;
+    return `<div class="card card-p" style="cursor:default;">
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+        <div style="font-size:22px;">${(PROJECT_TYPES[p.type]||'📁').split(' ')[0]}</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:700;color:white;">${p.name}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">${p.desc||''}</div>
+        </div>
+        <span class="badge ${st.cls}">${st.label}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="background:rgba(7,12,24,.5);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:18px;font-weight:700;color:white;">${done}</div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;">Atlikta</div>
+        </div>
+        <div style="background:rgba(7,12,24,.5);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:18px;font-weight:700;color:${active>0?'var(--green)':'white'};">${active}</div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;">Vykdoma</div>
+        </div>
+        <div style="background:rgba(7,12,24,.5);border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:18px;font-weight:700;color:var(--muted);">€${p.target||0}</div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;">Tikslas/mėn</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+        ${(p.agents||[]).map(a => `<span class="badge badge-blue" style="font-size:10px;">${PROJECT_AGENTS[a]||a}</span>`).join('')}
+        ${p.url ? `<a href="${p.url}" target="_blank" style="margin-left:auto;font-size:11px;color:#a5b4fc;">🔗 Atidaryti →</a>` : ''}
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost" style="flex:1;font-size:12px;" onclick="openSpawnModal('${p.id}')">+ Užduotis</button>
+        <button class="btn btn-ghost" style="font-size:12px;" onclick="editProject('${p.id}')">✏️</button>
+        <button class="btn btn-ghost" style="font-size:12px;color:var(--red);" onclick="deleteProject('${p.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Update spawn project select
+  const sel = document.getElementById('spawn-project');
+  if (sel) {
+    sel.innerHTML = '<option value="">— Be projekto —</option>' +
+      projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  }
+}
+
+function openNewProject() {
+  const f = document.getElementById('project-form');
+  document.getElementById('project-form-title').textContent = 'Naujas projektas';
+  document.getElementById('pf-id').value = '';
+  ['pf-name','pf-desc','pf-url','pf-target'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pf-status').value = 'active';
+  document.getElementById('pf-type').value = 'funnel';
+  ['pa-code','pa-content','pa-research','pa-analytics'].forEach(id => document.getElementById(id).checked = false);
+  f.style.display = 'block';
+  f.scrollIntoView({behavior:'smooth'});
+}
+
+function editProject(id) {
+  const p = getProjects().find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('project-form-title').textContent = 'Redaguoti projektą';
+  document.getElementById('pf-id').value = p.id;
+  document.getElementById('pf-name').value = p.name;
+  document.getElementById('pf-desc').value = p.desc||'';
+  document.getElementById('pf-url').value = p.url||'';
+  document.getElementById('pf-target').value = p.target||'';
+  document.getElementById('pf-status').value = p.status||'active';
+  document.getElementById('pf-type').value = p.type||'other';
+  ['code','content','research','analytics'].forEach(a => {
+    document.getElementById('pa-'+a).checked = (p.agents||[]).includes(a);
+  });
+  document.getElementById('project-form').style.display = 'block';
+  document.getElementById('project-form').scrollIntoView({behavior:'smooth'});
+}
+
+function saveProject() {
+  const id = document.getElementById('pf-id').value;
+  const agents = ['code','content','research','analytics'].filter(a => document.getElementById('pa-'+a).checked);
+  const data = {
+    id: id || 'p' + Date.now(),
+    name: document.getElementById('pf-name').value.trim(),
+    desc: document.getElementById('pf-desc').value.trim(),
+    url: document.getElementById('pf-url').value.trim(),
+    target: +document.getElementById('pf-target').value || 0,
+    status: document.getElementById('pf-status').value,
+    type: document.getElementById('pf-type').value,
+    agents,
+    created: id ? (getProjects().find(p=>p.id===id)||{}).created : new Date().toISOString().slice(0,10),
+  };
+  if (!data.name) { toast('Įvesk projekto pavadinimą', 'error'); return; }
+  const projects = getProjects();
+  const idx = projects.findIndex(p => p.id === id);
+  if (idx >= 0) projects[idx] = data;
+  else projects.push(data);
+  saveProjects(projects);
+  renderProjects();
+  document.getElementById('project-form').style.display = 'none';
+  toast(`Projektas "${data.name}" išsaugotas`, 'success');
+}
+
+function deleteProject(id) {
+  const projects = getProjects().filter(p => p.id !== id);
+  saveProjects(projects);
+  renderProjects();
+  toast('Projektas ištrintas', 'info');
+}
+
+// =========================================
+// AGENT TASKS LOG
+// =========================================
+function getTasks() { return JSON.parse(localStorage.getItem('agent_tasks') || '[]'); }
+function saveTasks(arr) { localStorage.setItem('agent_tasks', JSON.stringify(arr)); }
+function getTasksForProject(pid) { return getTasks().filter(t => t.projectId === pid); }
+
+const AGENT_ICONS = { code:'💻', content:'✍️', research:'🔍', analytics:'📊', aras:'🦅', auto:'🦅' };
+const AGENT_NAMES = { code:'Code Agent', content:'Content Agent', research:'Research Agent', analytics:'Analytics Agent', aras:'Aras', auto:'Aras → auto' };
+
+function showAgentTab(tab) {
+  ['agents','recs','log'].forEach(t => {
+    const el = document.getElementById('agent-'+t+'-tab') || (t==='agents' ? document.querySelector('.agents-grid') : null);
+    const btn = document.getElementById('atab-'+t);
+    if (el) el.style.display = 'none';
+    if (btn) btn.classList.remove('active');
+  });
+  if (tab === 'agents') {
+    document.querySelector('.agents-grid').style.display = 'grid';
+  } else {
+    document.getElementById('agent-'+tab+'-tab').style.display = 'block';
+    if (tab === 'log') renderTaskLog();
+    if (tab === 'recs') renderAllRecs();
+  }
+  const btn = document.getElementById('atab-'+tab);
+  if (btn) btn.classList.add('active');
+}
+
+function renderTaskLog() {
+  const tasks = getTasks().slice().reverse(); // newest first
+  const el = document.getElementById('task-log-list');
+  if (!tasks.length) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">Dar nėra užduočių. Sukurk pirmą → "+ Nauja užduotis"</div>'; return; }
+  const projects = getProjects();
+  el.innerHTML = tasks.map(t => {
+    const proj = projects.find(p => p.id === t.projectId);
+    const statusBadge = t.status === 'done' ? '<span class="badge badge-green">✓ Atlikta</span>' :
+      t.status === 'running' ? '<span class="badge badge-blue" style="animation:pulse 2s infinite;">● Vykdoma</span>' :
+      t.status === 'error' ? '<span class="badge badge-red">✗ Klaida</span>' :
+      '<span class="badge badge-gray">⏳ Laukia</span>';
+    return `<div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:flex-start;">
+      <div style="font-size:22px;flex-shrink:0;">${AGENT_ICONS[t.agent]||'🤖'}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+          <span style="font-size:12.5px;font-weight:600;color:white;">${AGENT_NAMES[t.agent]||t.agent}</span>
+          ${proj ? `<span class="badge badge-blue" style="font-size:10px;">${proj.name}</span>` : ''}
+          ${statusBadge}
+          <span style="font-size:11px;color:var(--muted);margin-left:auto;">${new Date(t.created).toLocaleString('lt-LT')}</span>
+        </div>
+        <div style="font-size:12.5px;color:#94a3b8;line-height:1.5;">${t.task}</div>
+        ${t.result ? `<div style="margin-top:8px;padding:8px 10px;background:rgba(7,12,24,.6);border-radius:6px;font-size:12px;color:#cbd5e1;border-left:3px solid var(--green);">${t.result}</div>` : ''}
+      </div>
+      <button onclick="deleteTask('${t.id}')" style="color:var(--muted);background:none;border:none;cursor:pointer;font-size:14px;flex-shrink:0;">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function renderAllRecs() {
+  // Collect all recs from agent cards
+  const recs = document.querySelectorAll('#page-agents .rec');
+  const el = document.getElementById('all-recs-list');
+  if (!recs.length) { el.innerHTML = '<div class="empty"><div class="icon">💡</div><h3>Nėra rekomendacijų</h3><p>Paleisk analizę kad gautum pasiūlymų</p></div>'; return; }
+  el.innerHTML = '';
+  recs.forEach(rec => { if (rec.closest('.rec-list')) el.appendChild(rec.cloneNode(true)); });
+}
+
+function openSpawnModal(projectId) {
+  const sel = document.getElementById('spawn-project');
+  if (projectId && sel) sel.value = projectId;
+  document.getElementById('spawn-task').value = '';
+  document.getElementById('spawn-agent').value = 'auto';
+  document.getElementById('spawn-overlay').style.display = 'flex';
+}
+
+function spawnAgentTask() {
+  const agentType = document.getElementById('spawn-agent').value;
+  const projectId = document.getElementById('spawn-project').value;
+  const taskText = document.getElementById('spawn-task').value.trim();
+  if (!taskText) { toast('Įvesk užduoties aprašymą', 'error'); return; }
+
+  const task = {
+    id: 't' + Date.now(),
+    agent: agentType,
+    projectId,
+    task: taskText,
+    status: 'running',
+    created: new Date().toISOString(),
+    result: null,
+  };
+
+  const tasks = getTasks();
+  tasks.push(task);
+  saveTasks(tasks);
+  document.getElementById('spawn-overlay').style.display = 'none';
+  toast(`Užduotis perduota → ${AGENT_NAMES[agentType]}`, 'success');
+  renderProjects();
+
+  // Simulate agent work (in production this would use sessions_spawn)
+  setTimeout(() => {
+    const all = getTasks();
+    const t = all.find(x => x.id === task.id);
+    if (t) {
+      t.status = 'done';
+      t.result = `[${AGENT_NAMES[agentType]}] Užduotis priimta. Rezultatas bus pateiktas per Telegram.`;
+      saveTasks(all);
+      renderProjects();
+      if (document.getElementById('agent-log-tab').style.display !== 'none') renderTaskLog();
+      toast(`✓ ${AGENT_NAMES[agentType]} baigė užduotį`, 'success');
+    }
+  }, 3000);
+}
+
+function deleteTask(id) {
+  saveTasks(getTasks().filter(t => t.id !== id));
+  renderTaskLog();
+}
+
+function clearTaskLog() {
+  if (!confirm('Išvalyti visą užduočių istoriją?')) return;
+  saveTasks([]);
+  renderTaskLog();
+}
+
+// =========================================
+// MEMORY SAVE
+// =========================================
+function saveMemory() {
+  const projects = getProjects();
+  const tasks = getTasks().slice(-10);
+  const summary = `📊 Dashboard išsaugota ${new Date().toLocaleString('lt-LT')}\n\nProjektai (${projects.length}):\n${projects.map(p=>` • ${p.name} — ${PROJECT_STATUS[p.status]?.label}`).join('\n')}\n\nPaskutinės užduotys (${tasks.length}):\n${tasks.slice(-5).map(t=>' • ['+AGENT_NAMES[t.agent]+'] '+t.task.slice(0,60)).join('\n')}`;
+  localStorage.setItem('last_memory_save', new Date().toISOString());
+  localStorage.setItem('last_memory_content', summary);
+  toast('Kontekstas išsaugotas → Aras atmintis atnaujinta', 'success');
+  console.log('MEMORY_SAVE:', summary);
+}
+
+// =========================================
 // STRIPE INTEGRATION
 // =========================================
 const STRIPE_API = 'https://api.stripe.com/v1';
@@ -1568,6 +1980,9 @@ window.addEventListener('load', () => {
   if (stripeKey) {
     loadStripeData(true);
   }
+
+  // Init projects & tasks
+  initProjects();
 
   // Rec badge
   document.getElementById('rec-badge').style.display = 'flex';

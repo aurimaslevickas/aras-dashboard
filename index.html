@@ -1654,19 +1654,64 @@ function spawnAgentTask() {
   toast(`Užduotis perduota → ${AGENT_NAMES[agentType]}`, 'success');
   renderProjects();
 
-  // Simulate agent work (in production this would use sessions_spawn)
-  setTimeout(() => {
+  // Real OpenAI API call
+  const openaiKey = localStorage.getItem('openai_key');
+  if (!openaiKey) {
+    toast('OpenAI raktas nerastas — įvesk Nustatymuose', 'error');
+    const all = getTasks(); const t = all.find(x=>x.id===task.id);
+    if(t){t.status='error';t.result='Trūksta OpenAI rakto. Įvesk Nustatymuose → OpenAI.';saveTasks(all);renderProjects();}
+    return;
+  }
+
+  const AGENT_PROMPTS = {
+    content: 'Tu esi marketingo copywriter specialistas. Rašai įtikinamą lietuvišką turinį: reklamos tekstus, el. laiškus, socialinių tinklų postus. Būk konkretus, praktiškas. Pateik paruoštą turinį kurį galima iš karto naudoti.',
+    code: 'Tu esi web developer. Rašai švarų HTML, CSS, JavaScript kodą. Pateik tik veikiantį kodą su trumpu paaiškinimų. Fokusas: greitis ir paprastumas.',
+    research: 'Tu esi rinkos tyrėjas. Analizuoji konkurentus, tendencijas, tikslinę auditoriją. Pateik struktūruotą analizę su konkrečiomis įžvalgomis.',
+    analytics: 'Tu esi duomenų analitikas. Interpretuoji marketingo duomenis, skaičiuoji KPI, pateiki rekomendacijas. Būk konkretus su skaičiais.'
+  };
+
+  const systemPrompt = AGENT_PROMPTS[agentType] || AGENT_PROMPTS.content;
+  const projectName = getProjects().find(p=>p.id===projectId)?.name || 'bendras projektas';
+
+  renderTaskLog();
+
+  fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + openaiKey },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Projektas: ${projectName}\n\nUžduotis: ${taskText}` }
+      ],
+      max_tokens: 1500,
+      temperature: 0.7
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
     const all = getTasks();
     const t = all.find(x => x.id === task.id);
     if (t) {
-      t.status = 'done';
-      t.result = `[${AGENT_NAMES[agentType]}] Užduotis priimta. Rezultatas bus pateiktas per Telegram.`;
+      if (data.choices && data.choices[0]) {
+        t.status = 'done';
+        t.result = data.choices[0].message.content;
+        t.tokens = data.usage?.total_tokens;
+      } else {
+        t.status = 'error';
+        t.result = 'API klaida: ' + (data.error?.message || JSON.stringify(data));
+      }
       saveTasks(all);
       renderProjects();
-      if (document.getElementById('agent-log-tab').style.display !== 'none') renderTaskLog();
+      renderTaskLog();
       toast(`✓ ${AGENT_NAMES[agentType]} baigė užduotį`, 'success');
     }
-  }, 3000);
+  })
+  .catch(err => {
+    const all = getTasks(); const t = all.find(x=>x.id===task.id);
+    if(t){t.status='error';t.result='Ryšio klaida: '+err.message;saveTasks(all);renderProjects();renderTaskLog();}
+    toast('Klaida: ' + err.message, 'error');
+  });
 }
 
 function deleteTask(id) {

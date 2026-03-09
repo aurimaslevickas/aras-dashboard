@@ -1,3 +1,6 @@
 .env.local
 .credentials
 node_modules
+memory/
+*.credentials
+.env

@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "skills": {
+    "agent-team-orchestration": {
+      "version": "1.0.0",
+      "installedAt": 1773050489362
+    },
+    "self-improving": {
+      "version": "1.2.10",
+      "installedAt": 1773050490928
+    },
+    "proactive-agent-lite": {
+      "version": "1.0.0",
+      "installedAt": 1773050492261
+    },
+    "wal-memory": {
+      "version": "1.0.2",
+      "installedAt": 1773050494113
+    },
+    "security-audit-toolkit": {
+      "version": "1.0.0",
+      "installedAt": 1773050502301
+    },
+    "marketing-strategy-pmm": {
+      "version": "1.0.0",
+      "installedAt": 1773050504316
+    },
+    "social-media-scheduler": {
+      "version": "1.0.0",
+      "installedAt": 1773050506197
+    },
+    "social-media-agent": {
+      "version": "1.0.0",
+      "installedAt": 1773050507704
+    },
+    "content-calendar": {
+      "version": "1.0.1",
+      "installedAt": 1773050509689
+    },
+    "crm-lead-manager": {
+      "version": "1.0.0",
+      "installedAt": 1773050523640
+    },
+    "lead-scorer": {
+      "version": "1.0.0",
+      "installedAt": 1773050526663
+    },
+    "landing-page-generator": {
+      "version": "1.0.0",
+      "installedAt": 1773050528343
+    },
+    "automation-workflows": {
+      "version": "0.1.0",
+      "installedAt": 1773050533540
+    },
+    "openclaw-youtube-transcript": {
+      "version": "1.0.0",
+      "installedAt": 1773050540482
+    },
+    "web-scraping-api": {
+      "version": "1.0.0",
+      "installedAt": 1773050541806
+    },
+    "planning-with-files": {
+      "version": "1.2.0",
+      "installedAt": 1773050543544
+    },
+    "taskr": {
+      "version": "1.0.2",
+      "installedAt": 1773050545008
+    },
+    "email-automation": {
+      "version": "1.0.0",
+      "installedAt": 1773050546641
+    },
+    "memory-hygiene": {
+      "version": "1.0.0",
+      "installedAt": 1773050549439
+    },
+    "elite-longterm-memory": {
+      "version": "1.2.3",
+      "installedAt": 1773050550921
+    }
+  }
+}

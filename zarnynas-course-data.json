@@ -1,0 +1,71 @@
+{
+  "course": {
+    "title": "SVEIKAS ŽARNYNAS",
+    "instructor": "Indrė Misiūnienė",
+    "instructor_title": "Gyd.",
+    "members_count": 108
+  },
+  "lessons": [
+    {
+      "order": 1,
+      "title": "Pirma paskaita",
+      "type": "video",
+      "platform": "youtube",
+      "video_id": "PrxR5HtJyVE",
+      "embed_url": "https://www.youtube.com/embed/PrxR5HtJyVE"
+    },
+    {
+      "order": 2,
+      "title": "Antra paskaita",
+      "type": "video",
+      "platform": "youtube",
+      "video_id": "t1_70Ppiq7o",
+      "embed_url": "https://www.youtube.com/embed/t1_70Ppiq7o"
+    },
+    {
+      "order": 3,
+      "title": "Trečia paskaita",
+      "type": "video",
+      "platform": "youtube",
+      "video_id": "fw7AnoorZMs",
+      "embed_url": "https://www.youtube.com/embed/fw7AnoorZMs"
+    },
+    {
+      "order": 4,
+      "title": "Ketvirta paskaita",
+      "type": "video",
+      "platform": "youtube",
+      "video_id": "J2U4zpa08MA",
+      "embed_url": "https://www.youtube.com/embed/J2U4zpa08MA"
+    },
+    {
+      "order": 5,
+      "title": "Penkta paskaita",
+      "type": "video",
+      "platform": "youtube",
+      "video_id": "vbJdLBlkbRs",
+      "embed_url": "https://www.youtube.com/embed/vbJdLBlkbRs"
+    },
+    {
+      "order": 6,
+      "title": "GAPS sąrašai",
+      "type": "download",
+      "download_url": "https://drive.google.com/file/d/1dmu_0tEooMad9SW71sPCubnogkzBfHvR/view?usp=sharing",
+      "description": "GAPS sąrašai PDF"
+    },
+    {
+      "order": 7,
+      "title": "NUOLAIDOS",
+      "type": "text",
+      "content": "Nuolaidos kodai (neplatinti)\n10% nuolaida OMEGA3 papildams ROSITA\nNuoroda: https://lifedrops.lt/produktai/rosita-ypac-tyras-menkiu-kepeneliu-aliejus/\nNuolaidos kodas: SVEIKATA123\n-60% nuolaida PDF knygai SVEIKATOS PASLAPTYS\nhttps://sveikamityba.lt/pdf-knyga-sveikatos-paslaptys"
+    },
+    {
+      "order": 8,
+      "title": "Seminaras \"Žarnyno kodas\"",
+      "type": "video",
+      "platform": "vimeo",
+      "video_id": "1070267170",
+      "embed_url": "https://player.vimeo.com/video/1070267170"
+    }
+  ]
+}
